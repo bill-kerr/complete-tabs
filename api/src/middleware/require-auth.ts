@@ -16,7 +16,7 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
 
   const authToken = authHeader[1];
   try {
-    await verifyToken(authToken);
+    req.user = await verifyToken(authToken);
   } catch (error) {
     throw new UnauthorizedError('Invalid access token.');
   }

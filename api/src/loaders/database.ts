@@ -1,11 +1,12 @@
 import { createConnection } from 'typeorm';
 import { config } from '../config';
+import { Organization } from '../domain/organization/organization.entity';
 
 export function connectDatabase() {
   return createConnection({
     type: 'postgres',
     url: config.PG_CONN_STRING,
-    entities: [],
+    entities: [Organization],
     synchronize: config.NODE_ENV === 'development',
   });
 }
