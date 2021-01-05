@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:alpine
+    env_file:
+      - ./api/db.env
+    volumes:
+      - pgdata-complete_tabs:/var/lib/postgresql/data
+  api:
+    depends_on:
+      - db
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    ports:
+      - 3333:3333
+    env_file:
+      - ./api/dev.env
+    volumes:
+      - /app/node_modules
+      - ./api:/app
+
+volumes:
+  pgdata-complete_tabs:
