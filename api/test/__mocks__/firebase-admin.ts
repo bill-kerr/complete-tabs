@@ -5,16 +5,42 @@ class FirebaseError extends Error {
 }
 
 async function verifyIdToken(token: string) {
-  if (token === 'fail:invalid') {
-    throw new FirebaseError('auth/invalid-id-token');
-  } else if (token === 'fail:expired') {
-    throw new FirebaseError('auth/id-token-expired');
+  const { org, user } = parseToken(token);
+
+  switch (token) {
+    case 'fail:invalid':
+      throw new FirebaseError('auth/invalid-id-token');
+    case 'fail:expired':
+      throw new FirebaseError('auth/id-token-expired');
+    default:
+      return {
+        uid: user,
+        email: 'test@test.com',
+        organizationId: org,
+      };
   }
+}
+
+function parseToken(token: string) {
   return {
-    uid: token,
-    email: 'test@test.com',
-    organizationId: '',
+    user: findInString(token, 'user:') || 'test-id',
+    org: findInString(token, 'org:') || '',
   };
+}
+
+function findInString(text: string, searchString: string) {
+  const index = text.search(searchString);
+  return index > -1 ? sliceString(index + searchString.length, text) : null;
+}
+
+function sliceString(startIndex: number, text: string) {
+  const length = findEnd(text.slice(startIndex));
+  return text.slice(startIndex, startIndex + length);
+}
+
+function findEnd(text: string) {
+  const spaceIdx = text.search(' ');
+  return spaceIdx === -1 ? text.length : spaceIdx;
 }
 
 async function createUser(properties: { uid?: string; email?: string; password?: string }) {

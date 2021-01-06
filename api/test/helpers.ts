@@ -59,4 +59,8 @@ export const headers = {
     ...defaultHeaders,
     Authorization: 'Bearer fail:expired',
   },
+  userWithOrg: (orgId: string, userId: string = 'test-id') => ({
+    ...defaultHeaders,
+    Authorization: `Bearer org:${orgId} user:${userId}`,
+  }),
 };

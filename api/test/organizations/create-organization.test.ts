@@ -23,6 +23,13 @@ it('can create an organization', async () => {
   });
 });
 
+it('cannot create an organization with the same name', async () => {
+  await client.post(testOrg, '/organizations');
+  const res = await client.post(testOrg, '/organizations', headers.secondUser);
+  expect(res.status).toBe(400);
+  expect(res.body.details).toBe('A organization with that name already exists.');
+});
+
 it('only accepts organization names that are longer than 2 and less than 256 characters', async () => {
   let res = await client.post({ name: '12' }, '/organizations');
   expect(res.status).toBe(400);
@@ -32,5 +39,15 @@ it('only accepts organization names that are longer than 2 and less than 256 cha
     name += '1';
   }
   res = await client.post({ name }, '/organizations');
+  expect(res.status).toBe(400);
+});
+
+it('cannot create an organization if the user already belongs to one', async () => {
+  let res = await client.post(testOrg, '/organizations');
+  res = await client.post(
+    { name: 'other-org' },
+    '/organizations',
+    headers.userWithOrg(res.body.id, 'test-id')
+  );
   expect(res.status).toBe(400);
 });
