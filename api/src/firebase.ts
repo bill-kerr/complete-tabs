@@ -19,7 +19,6 @@ export function initFirebase() {
 export async function verifyToken(token: string) {
   try {
     const decodedToken = await firebase.auth().verifyIdToken(token);
-    console.log('decoded token', decodedToken);
     return mapDecodedToken(decodedToken);
   } catch (error) {
     handleFirebaseError(error);

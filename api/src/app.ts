@@ -1,5 +1,6 @@
+const env = getEnv();
 import dotenv from 'dotenv';
-dotenv.config({ path: './dev.env' });
+dotenv.config({ path: getEnvFile(env) });
 import { config } from './config';
 import { connectDatabase } from './loaders/database';
 import { initFirebase } from './firebase';
@@ -18,7 +19,23 @@ async function startApp() {
 
   initFirebase();
 
-  app.listen(config.PORT, () => console.log(`API server listening on port ${config.PORT}.`));
+  app.listen(config.PORT, () =>
+    console.log(`API server running in ${env} mode and listening on port ${config.PORT}.`)
+  );
+}
+
+function getEnvFile(env: string) {
+  if (env === 'test') {
+    return './.env.test';
+  } else if (env === 'development') {
+    return './.env.dev';
+  } else {
+    return './.env';
+  }
+}
+
+function getEnv() {
+  return process.env.NODE_ENV?.toLowerCase() || 'development';
 }
 
 startApp();

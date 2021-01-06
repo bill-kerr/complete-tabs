@@ -24,19 +24,3 @@ export async function getOrganizations(context: ReadContext<Organization>) {
   const orgs = await Organization.find(context.filter);
   return orgs;
 }
-
-export async function updateOrganizationById(id: string, context: WriteContext<Organization>) {
-  const org = await getOrganizationById(id, context);
-  const updatedOrg = Organization.merge(org, context.resource);
-  await updatedOrg.persist();
-  return updatedOrg;
-}
-
-export async function deleteOrganization(organization: Organization) {
-  await organization.delete();
-}
-
-export async function deleteOrganizationById(id: string, context: ReadContext<Organization>) {
-  const org = await getOrganizationById(id, context);
-  return deleteOrganization(org);
-}
