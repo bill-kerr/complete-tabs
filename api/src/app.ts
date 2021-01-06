@@ -26,9 +26,9 @@ async function startApp() {
 
 function getEnvFile(env: string) {
   if (env === 'test') {
-    return './.env.test';
+    return './test.env';
   } else if (env === 'development') {
-    return './.env.dev';
+    return './dev.env';
   } else {
     return './.env';
   }

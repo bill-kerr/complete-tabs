@@ -1,10 +1,16 @@
 version: '3.8'
 
 services:
+  test-db:
+    image: postgres:alpine
+    env_file:
+      - ./api/test/db.test.env
+    ports:
+      - 8888:8888
   db:
     image: postgres:alpine
     env_file:
-      - ./api/.env.db
+      - ./api/db.env
     volumes:
       - pgdata-complete_tabs:/var/lib/postgresql/data
   api:
@@ -16,7 +22,7 @@ services:
     ports:
       - 3333:3333
     env_file:
-      - ./api/.env.dev
+      - ./api/dev.env
     volumes:
       - /app/node_modules
       - ./api:/app

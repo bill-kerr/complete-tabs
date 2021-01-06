@@ -1,9 +1,9 @@
 import { Exclude, Expose } from 'class-transformer';
 import { IsBoolean, IsOptional, IsString, Length } from 'class-validator';
 import { Entity, Column, ManyToOne } from 'typeorm';
+import { ApiObject } from '../api-object';
 import { validation } from '../../validation';
 import { ALL, CREATE, CREATE_UPDATE } from '../groups';
-import { ApiObject } from '../api-object';
 import { Organization } from '../organization/organization.entity';
 
 @Entity()

@@ -2,7 +2,7 @@
   "name": "complete-tabs-api",
   "author": "Bill Kerr",
   "scripts": {
-    "dev": "set NODE_ENV=development && nodemon --ignore test/**/*.ts --legacy-watch --exec ts-node --files ./src/app.ts",
+    "dev": "nodemon --ignore ./**/*.test.ts --legacy-watch --exec ts-node --files ./src/app.ts",
     "test": "set NODE_ENV=test && jest --watchAll --no-cache --passWithNoTests",
     "test:coverage": "set NODE_ENV=test && jest --watchAll --no-cache --passWithNoTests --coverage"
   },

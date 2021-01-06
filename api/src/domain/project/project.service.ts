@@ -8,7 +8,8 @@ export async function createProjectByOrganization(
   organization: Organization
 ) {
   console.log('org', organization);
-  const project = Project.create({ ...context.resource, organization });
+  const project = Project.create(context.resource);
+  project.organization = organization;
   await project.persist();
   return project;
 }

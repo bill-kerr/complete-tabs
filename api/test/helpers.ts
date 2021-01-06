@@ -1,22 +1,25 @@
 import { Application } from 'express';
-import request from 'supertest';
 import { createConnection } from 'typeorm';
+import request from 'supertest';
 import { initExpressApp } from '../src/loaders/express';
 import { Organization } from '../src/domain/organization/organization.entity';
 import { Project } from '../src/domain/project/project.entity';
 
 export async function initialize() {
-  const connection = await createConnection({
-    type: 'sqlite',
-    database: ':memory:',
-    dropSchema: true,
-    entities: [Organization, Project],
-    synchronize: true,
-    logging: false,
-    name: 'default',
-  });
-  if (!connection.isConnected) {
-    throw new Error('Failed to connect to database');
+  try {
+    const connection = await createConnection({
+      type: 'postgres',
+      url: process.env.PG_CONN_STRING,
+      entities: [Organization, Project],
+      synchronize: true,
+      dropSchema: true,
+    });
+
+    if (!connection.isConnected) {
+      throw new Error('Failed to connect to database');
+    }
+  } catch (error) {
+    console.error(error);
   }
 
   return initExpressApp();
