@@ -23,7 +23,7 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "strictPropertyInitialization": false,
-    "typeRoots": ["@types", "./node_modules/@types"]
+    "typeRoots": ["./@types", "./node_modules/@types"]
   },
   "exclude": ["node_modules"],
   "include": ["./src/**/*.tsx", "./src/**/*.ts", "./test/**/*.ts"]

@@ -1,8 +1,10 @@
 import { getConnection } from 'typeorm';
 import { Organization } from '../src/domain/organization/organization.entity';
+import { Project } from '../src/domain/project/project.entity';
 
 afterEach(async () => {
   await Organization.clear();
+  await Project.clear();
 });
 
 afterAll(async () => {

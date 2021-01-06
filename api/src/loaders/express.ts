@@ -7,6 +7,7 @@ import { methodChecker, responseWrapper, verifyJson } from '../middleware';
 import { errorHandler, NotFoundError } from '../errors';
 import { authRouter } from '../domain/auth/auth.controller';
 import { organizationRouter } from '../domain/organization/organization.controller';
+import { projectRouter } from '../domain/project/project.controller';
 
 export function initExpressApp() {
   const app = express();
@@ -20,6 +21,7 @@ export function initExpressApp() {
   const v1 = express.Router();
   v1.use('/auth', authRouter);
   v1.use('/organizations', organizationRouter);
+  v1.use('/projects', projectRouter);
 
   app.use('/api/v1', v1);
 

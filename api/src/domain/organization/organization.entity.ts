@@ -1,9 +1,10 @@
 import { Exclude, Expose } from 'class-transformer';
 import { IsString, Length } from 'class-validator';
-import { Entity, Column } from 'typeorm';
+import { Entity, Column, OneToMany } from 'typeorm';
 import { validation } from '../../validation';
 import { ALL, CREATE, CREATE_UPDATE } from '../groups';
 import { ApiObject } from '../api-object';
+import { Project } from '../project/project.entity';
 
 @Entity()
 @Exclude()
@@ -18,4 +19,7 @@ export class Organization extends ApiObject {
   })
   @Column({ unique: true, nullable: false })
   name: string;
+
+  @OneToMany(() => Project, project => project.organization, { onDelete: 'CASCADE' })
+  projects: Project[];
 }

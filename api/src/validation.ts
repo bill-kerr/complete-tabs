@@ -10,6 +10,8 @@ export const validation = {
 
   string: (field: string) => `The ${field} field must contain a string.`,
 
+  boolean: (field: string) => `The ${field} field must contain a boolean value.`,
+
   email: (field: string = 'email') => `The ${field} field must contain a valid email.`,
 
   roleType: (field: string = 'type') => `The ${field} field must be one of ['USER', 'ADMIN'].`,

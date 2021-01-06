@@ -3,13 +3,14 @@ import request from 'supertest';
 import { createConnection } from 'typeorm';
 import { initExpressApp } from '../src/loaders/express';
 import { Organization } from '../src/domain/organization/organization.entity';
+import { Project } from '../src/domain/project/project.entity';
 
 export async function initialize() {
   const connection = await createConnection({
     type: 'sqlite',
     database: ':memory:',
     dropSchema: true,
-    entities: [Organization],
+    entities: [Organization, Project],
     synchronize: true,
     logging: false,
     name: 'default',

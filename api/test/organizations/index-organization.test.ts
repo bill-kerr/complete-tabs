@@ -27,6 +27,8 @@ it('can get an organization created by the user', async () => {
     object: 'organization',
     id: expect.any(String),
     name: testOrg.name,
+    createdAt: expect.any(Number),
+    updatedAt: expect.any(Number),
   });
 });
 

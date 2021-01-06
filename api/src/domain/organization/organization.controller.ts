@@ -14,6 +14,11 @@ router.get('/:id', requireMembership, async (req, res) => {
   return res.status(200).sendRes(org);
 });
 
+router.get('/', async (req, res) => {
+  const org = await getOrganizationById(req.user.organizationId, { user: req.user });
+  return res.status(200).sendRes(org);
+});
+
 router.post('/', validateBody(Organization, CREATE, true), async (req, res) => {
   const org = await createOrganization({ user: req.user, resource: req.body });
   return res.status(201).sendRes(org);

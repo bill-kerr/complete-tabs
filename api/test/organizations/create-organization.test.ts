@@ -20,6 +20,8 @@ it('can create an organization', async () => {
     object: 'organization',
     id: expect.any(String),
     name: 'test-org',
+    createdAt: expect.any(Number),
+    updatedAt: expect.any(Number),
   });
 });
 
