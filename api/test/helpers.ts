@@ -59,10 +59,10 @@ const defaultHeaders = {
 };
 export const headers = {
   default: defaultHeaders,
-  secondUser: {
+  otherUser: (userId: string = 'other-user') => ({
     ...defaultHeaders,
-    Authorization: 'Bearer second-user',
-  },
+    Authorization: `Bearer ${userId}`,
+  }),
   failTokenInvalid: {
     ...defaultHeaders,
     Authorization: 'Bearer fail:invalid',

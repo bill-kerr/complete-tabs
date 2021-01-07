@@ -28,7 +28,7 @@ it('can create an organization', async () => {
 
 it('cannot create an organization with the same name', async () => {
   await client.post(testOrg, '/organizations');
-  const res = await client.post(testOrg, '/organizations', headers.secondUser);
+  const res = await client.post(testOrg, '/organizations', headers.otherUser());
   expect(res.status).toBe(400);
   expect(res.body.details).toBe('A organization with that name already exists.');
 });

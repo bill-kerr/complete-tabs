@@ -56,7 +56,7 @@ it('can create a project from the projects endpoint', async () => {
 
 it('cannot create projects for organizations the user does not belong to', async () => {
   // Create other user's organization
-  const res = await client.post({ name: 'other-org' }, '/organizations', headers.secondUser);
+  const res = await client.post({ name: 'other-org' }, '/organizations', headers.otherUser());
   const otherOrgId = res.body.id;
 
   // Try to create project under other organization
@@ -123,3 +123,30 @@ it('cannot create a project with missing properties', async () => {
     details: validation.required('organizationId'),
   });
 });
+
+it('cannot create two projects with the same projectNumber', async () => {
+  let res = await client.post(testProject, `/organizations/${orgId}/projects`, defaultHeaders);
+  expect(res.status).toBe(201);
+  res = await client.post(testProject, `/organizations/${orgId}/projects`, defaultHeaders);
+  expect(res.status).toBe(400);
+});
+
+it('can create a project with same projectNumber if they belong to different organizations', async () => {
+  let res = await client.post(testProject, `/organizations/${orgId}/projects`, defaultHeaders);
+  expect(res.status).toBe(201);
+  res = await client.post(testProject, `/organizations/${orgId}/projects`, defaultHeaders);
+  expect(res.status).toBe(400);
+
+  // Create other user's organization
+  res = await client.post({ name: 'other-org' }, '/organizations', headers.otherUser());
+  const otherOrgId = res.body.id;
+
+  res = await client.post(
+    testProject,
+    `/organizations/${otherOrgId}/projects`,
+    headers.userWithOrg(otherOrgId, 'second-user')
+  );
+  expect(res.status).toBe(201);
+});
+
+it.todo('cannot create a project with unintended fields');

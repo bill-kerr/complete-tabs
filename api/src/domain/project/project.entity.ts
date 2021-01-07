@@ -1,27 +1,30 @@
 import { Exclude, Expose } from 'class-transformer';
 import { IsBoolean, IsOptional, IsString, Length, IsNotEmpty } from 'class-validator';
-import { Entity, Column, ManyToOne } from 'typeorm';
+import { Entity, Column, ManyToOne, Unique } from 'typeorm';
 import { ApiObject } from '../api-object';
 import { validation } from '../../validation';
-import { ALL, CREATE, CREATE_UPDATE } from '../groups';
+import { ALL, CREATE, CREATE_UPDATE, UPDATE } from '../groups';
 import { Organization } from '../organization/organization.entity';
 
 @Entity()
+@Unique(['projectNumber', 'organization'])
 @Exclude()
 export class Project extends ApiObject {
   object = 'project';
 
   @Expose({ groups: ALL })
+  @IsOptional({ groups: UPDATE })
   @IsNotEmpty({ groups: CREATE, message: validation.required('name') })
   @IsString({ groups: CREATE_UPDATE, message: validation.string('name') })
   @Length(3, 255, {
     groups: CREATE,
     message: validation.length('name', 3, 255),
   })
-  @Column({ unique: true, nullable: false })
+  @Column({ nullable: false })
   name: string;
 
   @Expose({ groups: ALL })
+  @IsOptional({ groups: UPDATE })
   @IsNotEmpty({ groups: CREATE, message: validation.required('projectNumber') })
   @IsString({ groups: CREATE_UPDATE, message: validation.string('projectNumber') })
   @Length(1, 255, {
@@ -52,14 +55,15 @@ export class Project extends ApiObject {
   client: string;
 
   @Expose({ groups: ALL })
+  @IsOptional({ groups: UPDATE })
   @IsNotEmpty({ groups: CREATE, message: validation.required('active') })
   @IsBoolean({ groups: CREATE_UPDATE, message: validation.boolean('active') })
   @Column({ nullable: false })
   active: boolean;
 
-  @Expose({ groups: CREATE_UPDATE })
-  @IsNotEmpty({ groups: CREATE_UPDATE, message: validation.required('organizationId') })
-  @IsString({ groups: CREATE_UPDATE, message: validation.string('organizationId') })
+  @Expose({ groups: CREATE })
+  @IsNotEmpty({ groups: CREATE, message: validation.required('organizationId') })
+  @IsString({ groups: CREATE, message: validation.string('organizationId') })
   organizationId: string;
 
   @ManyToOne(() => Organization, org => org.projects, { onDelete: 'CASCADE', eager: true })

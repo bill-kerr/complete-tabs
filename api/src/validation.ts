@@ -24,7 +24,9 @@ export const validation = {
 export function validateBody<T>(targetClass: ClassType<T>, groups: string[] = []) {
   return async (req: Request, _res: Response, next: NextFunction) => {
     req.body = plainToClass(targetClass, req.body, { groups });
-    const errors = await validate(req.body, { groups, forbidUnknownValues: true });
+    const errors = await validate(req.body, {
+      groups,
+    });
     if (errors.length > 0) {
       throw new ValidationError(errors);
     }

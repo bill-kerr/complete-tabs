@@ -3,7 +3,7 @@ import { requireAuth, requireMembership, addProperty } from '../../middleware';
 import { validateBody } from '../../validation';
 import { CREATE } from '../groups';
 import { Project } from '../project/project.entity';
-import { createProject } from '../project/project.service';
+import { createProject, getProjects } from '../project/project.service';
 import { Organization } from './organization.entity';
 import { createOrganization, getOrganizationById } from './organization.service';
 
@@ -29,6 +29,11 @@ router.post(
     return res.status(201).sendRes(org);
   }
 );
+
+router.get('/:id/projects', async (req, res) => {
+  const projects = await getProjects({ user: req.user });
+  return res.status(200).sendRes(projects);
+});
 
 router.post(
   '/:id/projects',

@@ -12,6 +12,13 @@ export async function getProjectById(id: string, context: ReadContext<Project>) 
   return project;
 }
 
+export async function getProjects(context: ReadContext<Project>) {
+  const projects = await Project.find({
+    where: { ...context.filter, organization: { id: context.user.organizationId } },
+  });
+  return projects;
+}
+
 export async function createProjectByOrganization(
   context: WriteContext<Project>,
   organization: Organization
@@ -25,4 +32,11 @@ export async function createProject(context: WriteContext<Project>, organization
   const org = await getOrganizationById(organizationId, { user: context.user });
   const project = await createProjectByOrganization(context, org);
   return project;
+}
+
+export async function updateProject(projectId: string, context: WriteContext<Project>) {
+  const project = await getProjectById(projectId, context);
+  const updatedProject = Project.merge(project, context.resource);
+  await updatedProject.persist();
+  return updatedProject;
 }

@@ -31,20 +31,25 @@ const createProject = async (project: Partial<Project> = testProject) => {
   return res.body as Project;
 };
 
-it('can get a project that belongs the the users current organization', async () => {
-  const project = await createProject(testProject);
-  const res = await client.get(`/projects/${project.id}`, defaultHeaders);
-  expect(res.body).toStrictEqual({
-    ...testProject,
-    object: 'project',
-    updatedAt: expect.any(Number),
-    createdAt: expect.any(Number),
-    id: expect.any(String),
-  });
+it('can list projects that belong to the users current organization', async () => {
+  await createProject(testProject);
+  await createProject({ ...testProject, projectNumber: 'other-project-number' });
+  let res = await client.get(`/projects`, defaultHeaders);
+  expect(res.body.data).toHaveLength(2);
+  expect(res.status).toBe(200);
+
+  res = await client.get(`/organizations/${orgId}/projects`, defaultHeaders);
+  expect(res.body.data).toHaveLength(2);
   expect(res.status).toBe(200);
 });
 
-it('can only get a project that belongs to the users organization', async () => {
+it('returns an empty list if no projects exist', async () => {
+  const res = await client.get(`/projects`, defaultHeaders);
+  expect(res.body.data).toHaveLength(0);
+  expect(res.status).toBe(200);
+});
+
+it('does not list projects from other organizations', async () => {
   // Create other user's organization
   let res = await client.post({ name: 'other-org' }, '/organizations', headers.otherUser());
   const otherOrgId = res.body.id;
@@ -55,20 +60,7 @@ it('can only get a project that belongs to the users organization', async () => 
     headers.userWithOrg(otherOrgId, 'other-user')
   );
   expect(res.status).toBe(201);
-  const otherProjectId = res.body.id;
 
-  res = await client.get(
-    `/projects/${otherProjectId}`,
-    headers.userWithOrg(otherOrgId, 'other-user')
-  );
-  expect(res.status).toBe(200);
-
-  res = await client.get(`/projects/${otherProjectId}`, defaultHeaders);
-  expect(res.status).toBe(404);
-});
-
-it('returns a 404 when the id does not match', async () => {
-  await createProject();
-  const res = await client.get(`/projects/does-not-exist`, defaultHeaders);
-  expect(res.status).toBe(404);
+  res = await client.get('/projects', defaultHeaders);
+  expect(res.body.data).toHaveLength(0);
 });
