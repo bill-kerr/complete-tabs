@@ -1,4 +1,5 @@
 import { Application } from 'express';
+import { validation } from '../../src/validation';
 import { headers, initialize, makeClient, TestClient } from '../helpers';
 
 let app: Application;
@@ -94,4 +95,31 @@ it('cannot create a project without sending an organization id', async () => {
   expect(res.status).toBe(400);
 });
 
-it.todo('cannot create a project with missing properties');
+it('cannot create a project with missing properties', async () => {
+  const res = await client.post({}, '/projects', headers.userWithOrg(orgId));
+  expect(res.status).toBe(400);
+
+  expect(res.body.details).toContainEqual({
+    object: 'error-detail',
+    name: 'Validation Error',
+    details: validation.required('name'),
+  });
+
+  expect(res.body.details).toContainEqual({
+    object: 'error-detail',
+    name: 'Validation Error',
+    details: validation.required('projectNumber'),
+  });
+
+  expect(res.body.details).toContainEqual({
+    object: 'error-detail',
+    name: 'Validation Error',
+    details: validation.required('active'),
+  });
+
+  expect(res.body.details).toContainEqual({
+    object: 'error-detail',
+    name: 'Validation Error',
+    details: validation.required('organizationId'),
+  });
+});

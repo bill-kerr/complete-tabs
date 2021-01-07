@@ -1,4 +1,5 @@
 import { Application } from 'express';
+import { validation } from '../../src/validation';
 import { headers, initialize, makeClient, TestClient } from '../helpers';
 
 let app: Application;
@@ -54,4 +55,12 @@ it('cannot create an organization if the user already belongs to one', async () 
   expect(res.status).toBe(400);
 });
 
-it.todo('cannot create an organization with missing properties');
+it('cannot create an organization with missing properties', async () => {
+  const res = await client.post({}, '/organizations');
+  expect(res.body.details).toContainEqual({
+    object: 'error-detail',
+    name: 'Validation Error',
+    details: validation.required('name'),
+  });
+  expect(res.status).toBe(400);
+});

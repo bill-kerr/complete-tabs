@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { IsString, Length } from 'class-validator';
+import { IsNotEmpty, IsString, Length } from 'class-validator';
 import { Entity, Column, OneToMany } from 'typeorm';
 import { validation } from '../../validation';
 import { ALL, CREATE, CREATE_UPDATE } from '../groups';
@@ -12,6 +12,7 @@ export class Organization extends ApiObject {
   object = 'organization';
 
   @Expose({ groups: ALL })
+  @IsNotEmpty({ groups: CREATE, message: validation.required('name') })
   @IsString({ groups: CREATE_UPDATE, message: validation.string('name') })
   @Length(3, 255, {
     groups: CREATE,

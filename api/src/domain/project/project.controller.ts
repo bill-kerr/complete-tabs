@@ -3,10 +3,15 @@ import { requireAuth, requireMembership } from '../../middleware';
 import { validateBody } from '../../validation';
 import { CREATE } from '../groups';
 import { Project } from './project.entity';
-import { createProject } from './project.service';
+import { createProject, getProjectById } from './project.service';
 
 const router = express.Router();
 router.use(requireAuth);
+
+router.get('/:id', async (req, res) => {
+  const project = await getProjectById(req.params.id, { user: req.user });
+  return res.status(200).sendRes(project);
+});
 
 router.post(
   '/',

@@ -12,6 +12,7 @@ export class Project extends ApiObject {
   object = 'project';
 
   @Expose({ groups: ALL })
+  @IsNotEmpty({ groups: CREATE, message: validation.required('name') })
   @IsString({ groups: CREATE_UPDATE, message: validation.string('name') })
   @Length(3, 255, {
     groups: CREATE,
@@ -51,6 +52,7 @@ export class Project extends ApiObject {
   client: string;
 
   @Expose({ groups: ALL })
+  @IsNotEmpty({ groups: CREATE, message: validation.required('active') })
   @IsBoolean({ groups: CREATE_UPDATE, message: validation.boolean('active') })
   @Column({ nullable: false })
   active: boolean;
@@ -60,6 +62,6 @@ export class Project extends ApiObject {
   @IsString({ groups: CREATE_UPDATE, message: validation.string('organizationId') })
   organizationId: string;
 
-  @ManyToOne(() => Organization, org => org.projects, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Organization, org => org.projects, { onDelete: 'CASCADE', eager: true })
   organization: Organization;
 }

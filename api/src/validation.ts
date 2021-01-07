@@ -18,7 +18,7 @@ export const validation = {
 
   operation: (field: string = 'operation') => `The ${field} field must contain a valid operation.`,
 
-  required: (field: string) => `The ${field} is required and should not be empty.`,
+  required: (field: string) => `The ${field} field is required and should not be empty.`,
 };
 
 export function validateBody<T>(targetClass: ClassType<T>, groups: string[] = []) {
