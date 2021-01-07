@@ -5,12 +5,14 @@ import { config } from './config';
 import { connectDatabase } from './loaders/database';
 import { initFirebase } from './firebase';
 import { initExpressApp } from './loaders/express';
+import { Organization } from './domain/organization/organization.entity';
+import { Project } from './domain/project/project.entity';
 
 async function startApp() {
   const app = initExpressApp();
 
   try {
-    await connectDatabase();
+    await connectDatabase([Organization, Project]);
     console.log('API server connected to database.');
   } catch (error) {
     console.error(error);

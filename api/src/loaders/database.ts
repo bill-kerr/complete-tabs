@@ -1,14 +1,14 @@
 import { createConnection, getConnection } from 'typeorm';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { config } from '../config';
-import { Organization } from '../domain/organization/organization.entity';
-import { Project } from '../domain/project/project.entity';
 
-export function connectDatabase() {
+export function connectDatabase(entities: Function[]) {
   const connection = createConnection({
     type: 'postgres',
     url: config.PG_CONN_STRING,
-    entities: [Organization, Project],
+    entities,
     synchronize: config.NODE_ENV === 'development',
+    namingStrategy: new SnakeNamingStrategy(),
   });
 
   if (config.CLEAR_DB_ON_START) {

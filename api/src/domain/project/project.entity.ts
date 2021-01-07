@@ -26,7 +26,7 @@ export class Project extends ApiObject {
     groups: CREATE,
     message: validation.length('projectNumber', 1, 255),
   })
-  @Column({ nullable: false, name: 'project_number' })
+  @Column({ nullable: false })
   projectNumber: string;
 
   @Expose({ groups: ALL })

@@ -1,11 +1,17 @@
 import { Application } from 'express';
 import { createConnection } from 'typeorm';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import request from 'supertest';
 import { initExpressApp } from '../src/loaders/express';
 import { Organization } from '../src/domain/organization/organization.entity';
 import { Project } from '../src/domain/project/project.entity';
 
 export async function initialize() {
+  await connectTestDb();
+  return initExpressApp();
+}
+
+export async function connectTestDb() {
   try {
     const connection = await createConnection({
       type: 'postgres',
@@ -13,16 +19,18 @@ export async function initialize() {
       entities: [Organization, Project],
       synchronize: true,
       dropSchema: true,
+      namingStrategy: new SnakeNamingStrategy(),
     });
 
     if (!connection.isConnected) {
       throw new Error('Failed to connect to database');
     }
+
+    return connection;
   } catch (error) {
     console.error(error);
+    throw new Error(error);
   }
-
-  return initExpressApp();
 }
 
 export function makeClient(baseUrl: string, defaultHeaders: {}, app: Application) {
