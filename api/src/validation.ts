@@ -17,17 +17,12 @@ export const validation = {
   roleType: (field: string = 'type') => `The ${field} field must be one of ['USER', 'ADMIN'].`,
 
   operation: (field: string = 'operation') => `The ${field} field must contain a valid operation.`,
+
+  required: (field: string) => `The ${field} is required and should not be empty.`,
 };
 
-export function validateBody<T>(
-  targetClass: ClassType<T>,
-  groups: string[] = [],
-  addUserId = false
-) {
+export function validateBody<T>(targetClass: ClassType<T>, groups: string[] = []) {
   return async (req: Request, _res: Response, next: NextFunction) => {
-    if (addUserId) {
-      req.body.userId = req.user.id;
-    }
     req.body = plainToClass(targetClass, req.body, { groups });
     const errors = await validate(req.body, { groups, forbidUnknownValues: true });
     if (errors.length > 0) {

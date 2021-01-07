@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { IsBoolean, IsOptional, IsString, Length } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, Length, IsNotEmpty } from 'class-validator';
 import { Entity, Column, ManyToOne } from 'typeorm';
 import { ApiObject } from '../api-object';
 import { validation } from '../../validation';
@@ -21,6 +21,7 @@ export class Project extends ApiObject {
   name: string;
 
   @Expose({ groups: ALL })
+  @IsNotEmpty({ groups: CREATE, message: validation.required('projectNumber') })
   @IsString({ groups: CREATE_UPDATE, message: validation.string('projectNumber') })
   @Length(1, 255, {
     groups: CREATE,
@@ -55,10 +56,10 @@ export class Project extends ApiObject {
   active: boolean;
 
   @Expose({ groups: CREATE_UPDATE })
-  @IsOptional({ groups: CREATE_UPDATE })
+  @IsNotEmpty({ groups: CREATE_UPDATE, message: validation.required('organizationId') })
   @IsString({ groups: CREATE_UPDATE, message: validation.string('organizationId') })
   organizationId: string;
 
-  @ManyToOne(() => Organization, org => org.projects)
+  @ManyToOne(() => Organization, org => org.projects, { onDelete: 'CASCADE' })
   organization: Organization;
 }

@@ -53,3 +53,5 @@ it('cannot create an organization if the user already belongs to one', async () 
   );
   expect(res.status).toBe(400);
 });
+
+it.todo('cannot create an organization with missing properties');

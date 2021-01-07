@@ -12,7 +12,7 @@ async function startApp() {
   const app = initExpressApp();
 
   try {
-    await connectDatabase([Organization, Project]);
+    await connectDatabase(Organization, Project);
     console.log('API server connected to database.');
   } catch (error) {
     console.error(error);

@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { InternalServerError } from './errors';
+import { DatabaseError, getDatabaseError } from '../loaders/database';
+import { InternalServerError, NotFoundError } from './errors';
 import { BaseError, ErrorResponse } from './types';
 
 const defaultError: ErrorResponse = {
@@ -11,18 +12,11 @@ const defaultError: ErrorResponse = {
 
 export function errorHandler(err: Error, _req: Request, res: Response, _next: NextFunction) {
   if (err instanceof InternalServerError) {
-    handleUnknownError(err);
-    return res.status(defaultError.statusCode).json(defaultError);
+    return sendUnknownError(res, err);
   }
 
   if (err instanceof BaseError) {
-    const errorResponse: ErrorResponse = {
-      object: 'error',
-      name: err.name,
-      statusCode: err.statusCode,
-      details: err.details,
-    };
-    return res.status(err.statusCode).json(errorResponse);
+    return sendErrorResponse(res, err);
   }
 
   if (err instanceof SyntaxError) {
@@ -35,10 +29,34 @@ export function errorHandler(err: Error, _req: Request, res: Response, _next: Ne
     return res.status(400).json(errorResponse);
   }
 
-  handleUnknownError(err);
+  const dbError = getDatabaseError(err);
+  if (dbError !== DatabaseError.UNKNOWN) {
+    return handleDatabaseError(res, dbError);
+  }
+
+  return sendUnknownError(res, err);
+}
+
+function sendErrorResponse(res: Response, error: BaseError) {
+  const errorResponse: ErrorResponse = {
+    object: 'error',
+    name: error.name,
+    statusCode: error.statusCode,
+    details: error.details,
+  };
+  return res.status(error.statusCode).json(errorResponse);
+}
+
+function sendUnknownError(res: Response, error: Error) {
+  console.error(error);
   return res.status(defaultError.statusCode).json(defaultError);
 }
 
-function handleUnknownError(error: Error) {
-  console.error(error);
+function handleDatabaseError(res: Response, error: DatabaseError) {
+  switch (error) {
+    case DatabaseError.NOT_FOUND:
+      return sendErrorResponse(res, new NotFoundError());
+    default:
+      return sendUnknownError(res, new InternalServerError());
+  }
 }

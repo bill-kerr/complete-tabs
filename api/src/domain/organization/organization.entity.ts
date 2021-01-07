@@ -20,6 +20,6 @@ export class Organization extends ApiObject {
   @Column({ unique: true, nullable: false })
   name: string;
 
-  @OneToMany(() => Project, project => project.organization, { onDelete: 'CASCADE' })
+  @OneToMany(() => Project, project => project.organization)
   projects: Project[];
 }

@@ -2,7 +2,7 @@ import { createConnection, getConnection } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { config } from '../config';
 
-export function connectDatabase(entities: Function[]) {
+export function connectDatabase(...entities: Function[]) {
   const connection = createConnection({
     type: 'postgres',
     url: config.PG_CONN_STRING,
@@ -22,12 +22,15 @@ export function connectDatabase(entities: Function[]) {
 export enum DatabaseError {
   DUPLICATE = 'duplicate',
   UNKNOWN = 'unknown',
+  NOT_FOUND = 'not-found',
 }
 
 export function getDatabaseError(error: any): DatabaseError {
   switch (error.code) {
     case '23505':
       return DatabaseError.DUPLICATE;
+    case '22P02':
+      return DatabaseError.NOT_FOUND;
     default:
       return DatabaseError.UNKNOWN;
   }
