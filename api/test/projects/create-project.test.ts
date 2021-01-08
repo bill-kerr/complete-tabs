@@ -39,11 +39,7 @@ it('can create a project from the organizations endpoint', async () => {
 });
 
 it('can create a project from the projects endpoint', async () => {
-  const res = await client.post(
-    { ...testProject, organizationId: orgId },
-    '/projects',
-    defaultHeaders
-  );
+  const res = await client.post(testProject, '/projects', defaultHeaders);
   expect(res.body).toStrictEqual({
     ...testProject,
     id: expect.any(String),
@@ -56,31 +52,16 @@ it('can create a project from the projects endpoint', async () => {
 
 it('cannot create projects for organizations the user does not belong to', async () => {
   // Create other user's organization
-  const res = await client.post({ name: 'other-org' }, '/organizations', headers.otherUser());
+  let res = await client.post({ name: 'other-org' }, '/organizations', headers.otherUser());
   const otherOrgId = res.body.id;
 
   // Try to create project under other organization
-  const res1 = await client.post(
-    { ...testProject },
-    `/organizations/${otherOrgId}`,
-    headers.userWithOrg(orgId)
-  );
-  const res2 = await client.post(
-    { ...testProject, organizationId: otherOrgId },
-    '/projects',
-    headers.userWithOrg(orgId)
-  );
-
-  expect(res1.status).toBe(404);
-  expect(res2.status).toBe(404);
+  res = await client.post(testProject, `/organizations/${otherOrgId}`, headers.userWithOrg(orgId));
+  expect(res.status).toBe(404);
 });
 
 it('it cannot create projects for organizations that do not exist', async () => {
-  const res1 = await client.post(
-    { ...testProject, organizationId: 'does-not-exist' },
-    '/projects',
-    headers.userWithOrg('does-not-exist')
-  );
+  const res1 = await client.post(testProject, '/projects', headers.userWithOrg('does-not-exist'));
   const res2 = await client.post(
     testProject,
     `/organizations/does-not-exist/projects`,
@@ -90,12 +71,7 @@ it('it cannot create projects for organizations that do not exist', async () => 
   expect(res2.status).toBe(404);
 });
 
-it('cannot create a project without sending an organization id', async () => {
-  const res = await client.post(testProject, '/projects', headers.userWithOrg(orgId));
-  expect(res.status).toBe(400);
-});
-
-it('cannot create a project with missing properties', async () => {
+it('cannot create a project with missing required properties', async () => {
   const res = await client.post({}, '/projects', headers.userWithOrg(orgId));
   expect(res.status).toBe(400);
 
@@ -115,12 +91,6 @@ it('cannot create a project with missing properties', async () => {
     object: 'error-detail',
     name: 'Validation Error',
     details: validation.required('active'),
-  });
-
-  expect(res.body.details).toContainEqual({
-    object: 'error-detail',
-    name: 'Validation Error',
-    details: validation.required('organizationId'),
   });
 });
 

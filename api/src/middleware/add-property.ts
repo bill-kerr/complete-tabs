@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 
 interface AddPropertyOptions {
   key: string;
-  location: 'params' | 'query' | 'userId';
+  location: 'params' | 'query' | 'userId' | 'organizationId';
   destinationKey?: string;
 }
 
@@ -14,6 +14,11 @@ export function addProperty({ key, location, destinationKey }: AddPropertyOption
 
     if (location === 'userId') {
       req.body = { ...req.body, [destinationKey]: req.user.id };
+      next();
+    }
+
+    if (location === 'organizationId') {
+      req.body = { ...req.body, [destinationKey]: req.user.organizationId };
       next();
     }
 

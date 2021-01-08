@@ -1,5 +1,5 @@
 import express from 'express';
-import { requireAuth, requireMembership } from '../../middleware';
+import { requireAuth } from '../../middleware';
 import { validateBody } from '../../validation';
 import { CREATE, UPDATE } from '../groups';
 import { Project } from './project.entity';
@@ -20,18 +20,10 @@ router.get('/', async (req, res) => {
   return res.status(200).sendRes(projects);
 });
 
-router.post(
-  '/',
-  validateBody(Project, CREATE),
-  requireMembership('organizationId', 'body'),
-  async (req, res) => {
-    const project = await createProject(
-      { user: req.user, resource: req.body },
-      req.body.organizationId
-    );
-    return res.status(201).sendRes(project);
-  }
-);
+router.post('/', validateBody(Project, CREATE), async (req, res) => {
+  const project = await createProject({ user: req.user, resource: req.body });
+  return res.status(201).sendRes(project);
+});
 
 router.put('/:id', validateBody(Project, UPDATE), async (req, res) => {
   const project = await updateProject(req.params.id, { user: req.user, resource: req.body });

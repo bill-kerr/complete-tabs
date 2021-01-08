@@ -61,9 +61,6 @@ export class Project extends ApiObject {
   @Column({ nullable: false })
   active: boolean;
 
-  @Expose({ groups: CREATE })
-  @IsNotEmpty({ groups: CREATE, message: validation.required('organizationId') })
-  @IsString({ groups: CREATE, message: validation.string('organizationId') })
   organizationId: string;
 
   @ManyToOne(() => Organization, org => org.projects, { onDelete: 'CASCADE', eager: true })

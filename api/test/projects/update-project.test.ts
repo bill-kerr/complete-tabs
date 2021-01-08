@@ -98,7 +98,6 @@ it('cannot update unintended fields', async () => {
     `/projects/${project.id}`,
     defaultHeaders
   );
-  console.log(res.body);
   expect(res.status).toBe(400);
 
   res = await client.put({ organization: 'new-id' }, `/projects/${project.id}`, defaultHeaders);

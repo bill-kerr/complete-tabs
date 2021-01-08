@@ -1,5 +1,5 @@
 import express from 'express';
-import { requireAuth, requireMembership, addProperty } from '../../middleware';
+import { requireAuth, requireMembership } from '../../middleware';
 import { validateBody } from '../../validation';
 import { CREATE } from '../groups';
 import { Project } from '../project/project.entity';
@@ -20,15 +20,10 @@ router.get('/', async (req, res) => {
   return res.status(200).sendRes(org);
 });
 
-router.post(
-  '/',
-  addProperty({ location: 'userId', key: 'userId' }),
-  validateBody(Organization, CREATE),
-  async (req, res) => {
-    const org = await createOrganization({ user: req.user, resource: req.body });
-    return res.status(201).sendRes(org);
-  }
-);
+router.post('/', validateBody(Organization, CREATE), async (req, res) => {
+  const org = await createOrganization({ user: req.user, resource: req.body });
+  return res.status(201).sendRes(org);
+});
 
 router.get('/:id/projects', async (req, res) => {
   const projects = await getProjects({ user: req.user });
@@ -38,13 +33,9 @@ router.get('/:id/projects', async (req, res) => {
 router.post(
   '/:id/projects',
   requireMembership(),
-  addProperty({ key: 'id', location: 'params', destinationKey: 'organizationId' }),
   validateBody(Project, CREATE),
   async (req, res) => {
-    const project = await createProject(
-      { user: req.user, resource: req.body },
-      req.user.organizationId
-    );
+    const project = await createProject({ user: req.user, resource: req.body });
     return res.status(201).sendRes(project);
   }
 );

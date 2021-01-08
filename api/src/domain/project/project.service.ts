@@ -28,8 +28,8 @@ export async function createProjectByOrganization(
   return project;
 }
 
-export async function createProject(context: WriteContext<Project>, organizationId: string) {
-  const org = await getOrganizationById(organizationId, { user: context.user });
+export async function createProject(context: WriteContext<Project>) {
+  const org = await getOrganizationById(context.user.organizationId, { user: context.user });
   const project = await createProjectByOrganization(context, org);
   return project;
 }

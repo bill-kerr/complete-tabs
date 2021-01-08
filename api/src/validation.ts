@@ -14,22 +14,21 @@ export const validation = {
 
   email: (field: string = 'email') => `The ${field} field must contain a valid email.`,
 
-  roleType: (field: string = 'type') => `The ${field} field must be one of ['USER', 'ADMIN'].`,
-
-  operation: (field: string = 'operation') => `The ${field} field must contain a valid operation.`,
-
   required: (field: string) => `The ${field} field is required and should not be empty.`,
 };
 
 export function validateBody<T>(targetClass: ClassType<T>, groups: string[] = []) {
   return async (req: Request, _res: Response, next: NextFunction) => {
-    req.body = plainToClass(targetClass, req.body, { groups });
-    const errors = await validate(req.body, {
+    const data = setObjectPrototype(req.body, targetClass);
+    const errors = await validate(data, {
       groups,
+      whitelist: true,
+      forbidNonWhitelisted: true,
     });
     if (errors.length > 0) {
       throw new ValidationError(errors);
     }
+    req.body = plainToClass(targetClass, req.body, { groups });
     next();
   };
 }
@@ -38,9 +37,22 @@ export function mapClassValidationErrors(errors: ClassValidationError[]): string
   const messages: string[] = [];
   errors.forEach(error => {
     if (error.constraints) {
-      const fieldErrors = Object.values(error.constraints).map(message => message);
+      const fieldErrors = Object.values(error.constraints).map(message =>
+        parseValidationMessage(message)
+      );
       messages.push(...fieldErrors);
     }
   });
   return messages;
+}
+
+function parseValidationMessage(message: string) {
+  if (message.endsWith('should not exist')) {
+    message = message[0].toUpperCase() + message.slice(1) + '.';
+  }
+  return message;
+}
+
+function setObjectPrototype<T>(body: any, targetClass: ClassType<T>) {
+  return Object.setPrototypeOf(body, targetClass.prototype);
 }
