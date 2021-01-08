@@ -3,7 +3,13 @@ import { requireAuth } from '../../middleware';
 import { validateBody } from '../../validation';
 import { CREATE, UPDATE } from '../groups';
 import { Project } from './project.entity';
-import { createProject, getProjectById, getProjects, updateProject } from './project.service';
+import {
+  createProject,
+  deleteProject,
+  getProjectById,
+  getProjects,
+  updateProject,
+} from './project.service';
 
 const router = express.Router();
 router.use(requireAuth);
@@ -28,6 +34,11 @@ router.post('/', validateBody(Project, CREATE), async (req, res) => {
 router.put('/:id', validateBody(Project, UPDATE), async (req, res) => {
   const project = await updateProject(req.params.id, { user: req.user, resource: req.body });
   res.status(200).sendRes(project);
+});
+
+router.delete('/:id', async (req, res) => {
+  await deleteProject(req.params.id, { user: req.user });
+  res.sendStatus(204);
 });
 
 export { router as projectRouter };

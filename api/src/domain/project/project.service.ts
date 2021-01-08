@@ -40,3 +40,8 @@ export async function updateProject(projectId: string, context: WriteContext<Pro
   await updatedProject.persist();
   return updatedProject;
 }
+
+export async function deleteProject(projectId: string, context: ReadContext<Project>) {
+  const project = await getProjectById(projectId, context);
+  return project.delete();
+}

@@ -119,4 +119,16 @@ it('can create a project with same projectNumber if they belong to different org
   expect(res.status).toBe(201);
 });
 
-it.todo('cannot create a project with unintended fields');
+it('cannot create a project with unintended fields', async () => {
+  let res = await client.post(
+    { ...testProject, object: 'invalid-property' },
+    `/organizations/${orgId}/projects`,
+    defaultHeaders
+  );
+  expect(res.body.details).toContainEqual({
+    object: 'error-detail',
+    name: 'Validation Error',
+    details: validation.extra('object'),
+  });
+  expect(res.status).toBe(400);
+});

@@ -65,4 +65,15 @@ it('cannot create an organization with missing properties', async () => {
   expect(res.status).toBe(400);
 });
 
-it.todo('cannot create an organization with unintended properties');
+it('cannot create an organization with unintended properties', async () => {
+  const res = await client.post(
+    { object: 'invalid-property', name: 'test-name' },
+    '/organizations'
+  );
+  expect(res.body.details).toContainEqual({
+    object: 'error-detail',
+    name: 'Validation Error',
+    details: validation.extra('object'),
+  });
+  expect(res.status).toBe(400);
+});

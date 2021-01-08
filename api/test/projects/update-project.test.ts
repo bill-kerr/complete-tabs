@@ -128,4 +128,21 @@ it('cannot update unintended fields', async () => {
   });
 });
 
-it.todo('cannot update other organizations projects');
+it('cannot update other organizations projects', async () => {
+  // Create other user's organization
+  let res = await client.post(
+    { name: 'other-org' },
+    '/organizations',
+    headers.otherUser('other-user')
+  );
+  expect(res.status).toBe(201);
+  const otherOrgId = res.body.id;
+
+  // Create other org's project
+  res = await client.post(testProject, '/projects', headers.userWithOrg(otherOrgId, 'other-user'));
+  expect(res.status).toBe(201);
+  const otherProjectId = res.body.id;
+
+  res = await client.put({ name: 'new-name' }, `/projects/${otherProjectId}`, defaultHeaders);
+  expect(res.status).toBe(404);
+});

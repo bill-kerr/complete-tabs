@@ -15,6 +15,8 @@ export const validation = {
   email: (field: string = 'email') => `The ${field} field must contain a valid email.`,
 
   required: (field: string) => `The ${field} field is required and should not be empty.`,
+
+  extra: (property: string) => `Property ${property} should not exist.`,
 };
 
 export function validateBody<T>(targetClass: ClassType<T>, groups: string[] = []) {
