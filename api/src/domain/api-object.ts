@@ -3,21 +3,21 @@ import { BaseEntity, BeforeInsert, BeforeUpdate, Column, PrimaryColumn } from 't
 import { unixTime, uuid } from '../utils';
 import { BadRequestError, InternalServerError } from '../errors';
 import { DatabaseError, getDatabaseError } from '../loaders/database';
-import { READ } from './groups';
+import { Groups } from './groups';
 
 export abstract class ApiObject extends BaseEntity {
-  @Expose({ groups: READ })
+  @Expose({ groups: [Groups.READ] })
   abstract object: string;
 
-  @Expose({ groups: READ })
+  @Expose({ groups: [Groups.READ] })
   @PrimaryColumn('uuid')
   id: string;
 
-  @Expose({ groups: READ })
+  @Expose({ groups: [Groups.READ] })
   @Column({ name: 'created_at', default: 0 })
   createdAt: number;
 
-  @Expose({ groups: READ })
+  @Expose({ groups: [Groups.READ] })
   @Column({ name: 'updated_at', default: 0 })
   updatedAt: number;
 

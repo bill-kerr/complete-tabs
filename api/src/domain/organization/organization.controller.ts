@@ -1,7 +1,7 @@
 import express from 'express';
 import { requireAuth, requireMembership } from '../../middleware';
 import { validateBody } from '../../validation';
-import { CREATE } from '../groups';
+import { Groups } from '../groups';
 import { Project } from '../project/project.entity';
 import { createProject, getProjects } from '../project/project.service';
 import { Organization } from './organization.entity';
@@ -20,7 +20,7 @@ router.get('/', async (req, res) => {
   return res.status(200).sendRes(org);
 });
 
-router.post('/', validateBody(Organization, CREATE), async (req, res) => {
+router.post('/', validateBody(Organization, [Groups.CREATE]), async (req, res) => {
   const org = await createOrganization({ user: req.user, resource: req.body });
   return res.status(201).sendRes(org);
 });
@@ -33,7 +33,7 @@ router.get('/:id/projects', async (req, res) => {
 router.post(
   '/:id/projects',
   requireMembership(),
-  validateBody(Project, CREATE),
+  validateBody(Project, [Groups.CREATE]),
   async (req, res) => {
     const project = await createProject({ user: req.user, resource: req.body });
     return res.status(201).sendRes(project);

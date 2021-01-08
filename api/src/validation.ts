@@ -5,16 +5,16 @@ import { Request, Response, NextFunction } from 'express';
 import { ValidationError } from './errors';
 
 export const validation = {
-  length: (field: string, min: number, max: number) =>
-    `The ${field} field must be between ${min} and ${max} characters long.`,
+  length: (property: string, min: number, max: number) =>
+    `Property ${property} must be between ${min} and ${max} characters long.`,
 
-  string: (field: string) => `The ${field} field must contain a string.`,
+  string: (property: string) => `Property ${property} must contain a string.`,
 
-  boolean: (field: string) => `The ${field} field must contain a boolean value.`,
+  boolean: (property: string) => `Property ${property} must contain a boolean value.`,
 
-  email: (field: string = 'email') => `The ${field} field must contain a valid email.`,
+  email: (property: string = 'email') => `Property ${property} must contain a valid email.`,
 
-  required: (field: string) => `The ${field} field is required and should not be empty.`,
+  required: (property: string) => `Property ${property} is required and should not be empty.`,
 
   extra: (property: string) => `Property ${property} should not exist.`,
 };

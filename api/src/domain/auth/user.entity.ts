@@ -1,28 +1,28 @@
 import { Exclude, Expose } from 'class-transformer';
 import { IsEmail, IsOptional, IsString, Length } from 'class-validator';
-import { CREATE, READ, READ_CREATE } from '../groups';
+import { Groups } from '../groups';
 import { validation } from '../../validation';
 
 @Exclude()
 export class User {
-  @Expose({ groups: READ })
+  @Expose({ groups: [Groups.READ] })
   object = 'user';
 
-  @Expose({ groups: READ })
+  @Expose({ groups: [Groups.READ] })
   id: string;
 
-  @Expose({ groups: READ_CREATE })
-  @IsEmail({}, { groups: CREATE, message: validation.email() })
+  @Expose({ groups: [Groups.READ, Groups.CREATE] })
+  @IsEmail({}, { groups: [Groups.CREATE], message: validation.email() })
   email: string;
 
-  @Expose({ groups: READ_CREATE })
-  @IsOptional({ groups: CREATE })
-  @IsString({ groups: CREATE, message: validation.string('organizationId') })
+  @Expose({ groups: [Groups.READ, Groups.CREATE] })
+  @IsOptional({ groups: [Groups.CREATE] })
+  @IsString({ groups: [Groups.CREATE], message: validation.string('organizationId') })
   organizationId: string;
 
-  @Expose({ groups: CREATE })
+  @Expose({ groups: [Groups.CREATE] })
   @Length(6, 255, {
-    groups: CREATE,
+    groups: [Groups.CREATE],
     message: validation.length('password', 6, 255),
   })
   password: string;

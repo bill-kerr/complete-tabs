@@ -3,7 +3,7 @@ import { IsBoolean, IsOptional, IsString, Length, IsNotEmpty } from 'class-valid
 import { Entity, Column, ManyToOne, Unique } from 'typeorm';
 import { ApiObject } from '../api-object';
 import { validation } from '../../validation';
-import { ALL, CREATE, CREATE_UPDATE, UPDATE } from '../groups';
+import { Groups } from '../groups';
 import { Organization } from '../organization/organization.entity';
 
 @Entity()
@@ -12,52 +12,52 @@ import { Organization } from '../organization/organization.entity';
 export class Project extends ApiObject {
   object = 'project';
 
-  @Expose({ groups: ALL })
-  @IsOptional({ groups: UPDATE })
-  @IsNotEmpty({ groups: CREATE, message: validation.required('name') })
-  @IsString({ groups: CREATE_UPDATE, message: validation.string('name') })
+  @Expose({ groups: Groups.all() })
+  @IsOptional({ groups: [Groups.UPDATE] })
+  @IsNotEmpty({ groups: [Groups.CREATE], message: validation.required('name') })
+  @IsString({ groups: [Groups.CREATE, Groups.UPDATE], message: validation.string('name') })
   @Length(3, 255, {
-    groups: CREATE,
+    groups: [Groups.CREATE],
     message: validation.length('name', 3, 255),
   })
   @Column({ nullable: false })
   name: string;
 
-  @Expose({ groups: ALL })
-  @IsOptional({ groups: UPDATE })
-  @IsNotEmpty({ groups: CREATE, message: validation.required('projectNumber') })
-  @IsString({ groups: CREATE_UPDATE, message: validation.string('projectNumber') })
+  @Expose({ groups: Groups.all() })
+  @IsOptional({ groups: [Groups.UPDATE] })
+  @IsNotEmpty({ groups: [Groups.CREATE], message: validation.required('projectNumber') })
+  @IsString({ groups: [Groups.CREATE, Groups.UPDATE], message: validation.string('projectNumber') })
   @Length(1, 255, {
-    groups: CREATE,
+    groups: [Groups.CREATE, Groups.UPDATE],
     message: validation.length('projectNumber', 1, 255),
   })
   @Column({ nullable: false })
   projectNumber: string;
 
-  @Expose({ groups: ALL })
-  @IsOptional({ groups: CREATE_UPDATE })
-  @IsString({ groups: CREATE_UPDATE, message: validation.string('description') })
+  @Expose({ groups: Groups.all() })
+  @IsOptional({ groups: [Groups.CREATE, Groups.UPDATE] })
+  @IsString({ groups: [Groups.CREATE, Groups.UPDATE], message: validation.string('description') })
   @Length(1, 255, {
-    groups: CREATE,
+    groups: [Groups.CREATE, Groups.UPDATE],
     message: validation.length('description', 1, 255),
   })
   @Column({ nullable: true })
   description: string;
 
-  @Expose({ groups: ALL })
-  @IsOptional({ groups: CREATE_UPDATE })
-  @IsString({ groups: CREATE_UPDATE, message: validation.string('client') })
+  @Expose({ groups: Groups.all() })
+  @IsOptional({ groups: [Groups.CREATE, Groups.UPDATE] })
+  @IsString({ groups: [Groups.CREATE, Groups.UPDATE], message: validation.string('client') })
   @Length(1, 255, {
-    groups: CREATE,
+    groups: [Groups.CREATE, Groups.UPDATE],
     message: validation.length('client', 1, 255),
   })
   @Column({ nullable: true })
   client: string;
 
-  @Expose({ groups: ALL })
-  @IsOptional({ groups: UPDATE })
-  @IsNotEmpty({ groups: CREATE, message: validation.required('active') })
-  @IsBoolean({ groups: CREATE_UPDATE, message: validation.boolean('active') })
+  @Expose({ groups: Groups.all() })
+  @IsOptional({ groups: [Groups.UPDATE] })
+  @IsNotEmpty({ groups: [Groups.CREATE], message: validation.required('active') })
+  @IsBoolean({ groups: [Groups.CREATE, Groups.UPDATE], message: validation.boolean('active') })
   @Column({ nullable: false })
   active: boolean;
 
