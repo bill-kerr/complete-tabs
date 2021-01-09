@@ -30,7 +30,9 @@ it('cannot create an organization with the same name', async () => {
   await client.post(testOrg, '/organizations');
   const res = await client.post(testOrg, '/organizations', headers.otherUser());
   expect(res.status).toBe(400);
-  expect(res.body.details).toBe('A organization with that name already exists.');
+  expect(res.body.details).toBe(
+    'You attempted to set a unique property on organization to a value that already exists.'
+  );
 });
 
 it('only accepts organization names that are longer than 2 and less than 256 characters', async () => {

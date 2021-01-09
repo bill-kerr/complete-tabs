@@ -171,3 +171,5 @@ it('is able to create two contract-items with the same number under different pr
   );
   expect(res.status).toBe(201);
 });
+
+it.todo('cannot create a contract-item with invalid properties');

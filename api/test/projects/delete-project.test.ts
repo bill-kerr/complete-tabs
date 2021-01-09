@@ -73,3 +73,5 @@ it('cannot delete another organizations projects', async () => {
   );
   expect(res.status).toBe(200);
 });
+
+it.todo('deleting a project deletes all contract-items as well');

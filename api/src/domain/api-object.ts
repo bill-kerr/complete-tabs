@@ -45,7 +45,9 @@ export abstract class ApiObject extends BaseEntity {
     } catch (error) {
       switch (getDatabaseError(error)) {
         case DatabaseError.DUPLICATE:
-          throw new BadRequestError(`A ${this.object} with that name already exists.`);
+          throw new BadRequestError(
+            `You attempted to set a unique property on ${this.object} to a value that already exists.`
+          );
         default:
           throw new InternalServerError(error);
       }

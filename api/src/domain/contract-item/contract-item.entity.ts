@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { IsOptional, IsString, Length, IsNotEmpty, IsNumber } from 'class-validator';
+import { IsOptional, IsString, Length, IsNotEmpty, IsNumber, IsInt } from 'class-validator';
 import { Entity, Column, ManyToOne, Unique } from 'typeorm';
 import { ApiObject } from '../api-object';
 import { validation } from '../../validation';
@@ -24,7 +24,7 @@ export class ContractItem extends ApiObject {
   itemNumber: string;
 
   @Expose({ groups: Groups.all() })
-  @IsOptional({ groups: [Groups.UPDATE] })
+  @IsOptional({ groups: [Groups.UPDATE, Groups.CREATE] })
   @IsString({ groups: [Groups.CREATE, Groups.UPDATE], message: validation.string('description') })
   @Length(1, 255, {
     groups: [Groups.CREATE, Groups.UPDATE],
@@ -57,16 +57,13 @@ export class ContractItem extends ApiObject {
   @Expose({ groups: Groups.all() })
   @IsOptional({ groups: [Groups.UPDATE] })
   @IsNotEmpty({ groups: [Groups.CREATE], message: validation.required('unitPrice') })
-  @IsNumber(
-    { allowInfinity: false, allowNaN: false },
-    { groups: [Groups.CREATE, Groups.UPDATE], message: validation.integer('unitPrice') }
-  )
+  @IsInt({ groups: [Groups.CREATE, Groups.UPDATE], message: validation.integer('unitPrice') })
   @Column({ nullable: false, type: 'int' })
   unitPrice: number;
 
-  @Expose({ groups: [Groups.CREATE, Groups.UPDATE] })
-  @IsNotEmpty({ groups: [Groups.CREATE, Groups.UPDATE], message: validation.required('projectId') })
-  @IsString({ groups: [Groups.CREATE, Groups.UPDATE], message: validation.string('projectId') })
+  @Expose({ groups: [Groups.CREATE] })
+  @IsNotEmpty({ groups: [Groups.CREATE], message: validation.required('projectId') })
+  @IsString({ groups: [Groups.CREATE], message: validation.string('projectId') })
   projectId: string;
 
   @ManyToOne(() => Project, project => project.contractItems, { onDelete: 'CASCADE', eager: true })
