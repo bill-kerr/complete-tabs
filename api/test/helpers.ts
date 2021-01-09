@@ -84,3 +84,9 @@ export const apiObjectProps = (object: string) => ({
   createdAt: expect.any(Number),
   updatedAt: expect.any(Number),
 });
+
+export const validationError = (message: string) => ({
+  object: 'error-detail',
+  name: 'Validation Error',
+  details: message,
+});
