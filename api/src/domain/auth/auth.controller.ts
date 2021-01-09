@@ -1,6 +1,6 @@
 import express from 'express';
 import { createUser } from '../../firebase';
-import { validateBody } from '../../validation';
+import { validateBody } from '../../middleware';
 import { Groups } from '../groups';
 import { User } from './user.entity';
 

@@ -1,6 +1,5 @@
 import express from 'express';
-import { addProperty, requireAuth } from '../../middleware';
-import { validateBody } from '../../validation';
+import { addProperty, requireAuth, validateBody } from '../../middleware';
 import { ContractItem } from '../contract-item/contract-item.entity';
 import { createContractItem } from '../contract-item/contract-item.service';
 import { Groups } from '../groups';

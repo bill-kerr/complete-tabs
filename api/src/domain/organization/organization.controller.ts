@@ -1,6 +1,5 @@
 import express from 'express';
-import { requireAuth, requireMembership } from '../../middleware';
-import { validateBody } from '../../validation';
+import { requireAuth, requireMembership, validateBody } from '../../middleware';
 import { Groups } from '../groups';
 import { Project } from '../project/project.entity';
 import { createProject, getProjects } from '../project/project.service';
