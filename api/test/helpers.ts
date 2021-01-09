@@ -5,6 +5,7 @@ import request from 'supertest';
 import { initExpressApp } from '../src/loaders/express';
 import { Organization } from '../src/domain/organization/organization.entity';
 import { Project } from '../src/domain/project/project.entity';
+import { ContractItem } from '../src/domain/contract-item/contract-item.entity';
 
 export async function initialize() {
   await connectTestDb();
@@ -16,7 +17,7 @@ export async function connectTestDb() {
     const connection = await createConnection({
       type: 'postgres',
       url: process.env.PG_CONN_STRING,
-      entities: [Organization, Project],
+      entities: [Organization, Project, ContractItem],
       synchronize: true,
       dropSchema: true,
       namingStrategy: new SnakeNamingStrategy(),
@@ -76,3 +77,10 @@ export const headers = {
     Authorization: `Bearer org:${orgId} user:${userId}`,
   }),
 };
+
+export const apiObjectProps = (object: string) => ({
+  id: expect.any(String),
+  object,
+  createdAt: expect.any(Number),
+  updatedAt: expect.any(Number),
+});

@@ -1,6 +1,8 @@
 import express from 'express';
-import { requireAuth } from '../../middleware';
+import { addProperty, requireAuth } from '../../middleware';
 import { validateBody } from '../../validation';
+import { ContractItem } from '../contract-item/contract-item.entity';
+import { createContractItem } from '../contract-item/contract-item.service';
 import { Groups } from '../groups';
 import { Project } from './project.entity';
 import {
@@ -40,5 +42,18 @@ router.delete('/:id', async (req, res) => {
   await deleteProject(req.params.id, { user: req.user });
   res.sendStatus(204);
 });
+
+router.post(
+  '/:id/contract-items',
+  addProperty({ key: 'id', location: 'params', destinationKey: 'projectId' }),
+  validateBody(ContractItem, [Groups.CREATE]),
+  async (req, res) => {
+    const contractItem = await createContractItem(
+      { user: req.user, resource: req.body },
+      req.body.projectId
+    );
+    res.status(201).sendRes(contractItem);
+  }
+);
 
 export { router as projectRouter };

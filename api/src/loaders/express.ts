@@ -8,6 +8,7 @@ import { errorHandler, NotFoundError } from '../errors';
 import { authRouter } from '../domain/auth/auth.controller';
 import { organizationRouter } from '../domain/organization/organization.controller';
 import { projectRouter } from '../domain/project/project.controller';
+import { contractItemRouter } from '../domain/contract-item/contract-item.controller';
 
 export function initExpressApp() {
   const app = express();
@@ -22,6 +23,7 @@ export function initExpressApp() {
   v1.use('/auth', authRouter);
   v1.use('/organizations', organizationRouter);
   v1.use('/projects', projectRouter);
+  v1.use('/contract-items', contractItemRouter);
 
   app.use('/api/v1', v1);
 

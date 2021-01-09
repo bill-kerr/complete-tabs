@@ -12,6 +12,10 @@ export const validation = {
 
   boolean: (property: string) => `Property ${property} must contain a boolean value.`,
 
+  number: (property: string) => `Property ${property} must contain a number.`,
+
+  integer: (property: string) => `Property ${property} must contain an integer.`,
+
   email: (property: string = 'email') => `Property ${property} must contain a valid email.`,
 
   required: (property: string) => `Property ${property} is required and should not be empty.`,
