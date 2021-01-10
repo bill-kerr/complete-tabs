@@ -6,6 +6,7 @@ import { validation } from '../../validation';
 import { Groups } from '../groups';
 import { Organization } from '../organization/organization.entity';
 import { ContractItem } from '../contract-item/contract-item.entity';
+import { Estimate } from '../estimate/estimate.entity';
 
 @Entity()
 @Unique(['projectNumber', 'organization'])
@@ -69,4 +70,7 @@ export class Project extends ApiObject {
 
   @OneToMany(() => ContractItem, contractItem => contractItem.project)
   contractItems: ContractItem[];
+
+  @OneToMany(() => Estimate, estimate => estimate.project)
+  estimates: Estimate[];
 }

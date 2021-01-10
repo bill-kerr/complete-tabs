@@ -9,6 +9,7 @@ import { authRouter } from '../domain/auth/auth.controller';
 import { organizationRouter } from '../domain/organization/organization.controller';
 import { projectRouter } from '../domain/project/project.controller';
 import { contractItemRouter } from '../domain/contract-item/contract-item.controller';
+import { estimateRouter } from '../domain/estimate/estimate.controller';
 
 export function initExpressApp() {
   const app = express();
@@ -24,6 +25,7 @@ export function initExpressApp() {
   v1.use('/organizations', organizationRouter);
   v1.use('/projects', projectRouter);
   v1.use('/contract-items', contractItemRouter);
+  v1.use('/estimates', estimateRouter);
 
   app.use('/api/v1', v1);
 

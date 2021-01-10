@@ -1,4 +1,11 @@
-import { ValidationError as ClassValidationError } from 'class-validator';
+import {
+  ValidationArguments,
+  ValidationError as ClassValidationError,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+} from 'class-validator';
+import isValid from 'date-fns/isValid';
+import parse from 'date-fns/parse';
 
 export const validation = {
   length: (property: string, min: number, max: number) =>
@@ -11,6 +18,8 @@ export const validation = {
   number: (property: string) => `Property ${property} must contain a number.`,
 
   integer: (property: string) => `Property ${property} must contain an integer.`,
+
+  date: (property: string) => `Property ${property} must contain a date formatted as YYYY-MM-DD.`,
 
   email: (property: string = 'email') => `Property ${property} must contain a valid email.`,
 
@@ -37,4 +46,16 @@ function parseValidationMessage(message: string) {
     message = message[0].toUpperCase() + message.slice(1) + '.';
   }
   return message;
+}
+
+@ValidatorConstraint({ name: 'customDate', async: false })
+export class IsDate implements ValidatorConstraintInterface {
+  validate(text: string, _args: ValidationArguments) {
+    const date = parse(text, 'yyyy-MM-dd', new Date());
+    return isValid(date);
+  }
+
+  defaultMessage(_args: ValidationArguments) {
+    return 'Dates must be formatted as YYYY-MM-DD.';
+  }
 }
