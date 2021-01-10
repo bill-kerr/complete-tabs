@@ -1,7 +1,16 @@
 import { Application } from 'express';
 import { ContractItem } from '../../src/domain/contract-item/contract-item.entity';
 import { Project } from '../../src/domain/project/project.entity';
-import { apiObjectProps, headers, initialize, makeClient, TestClient } from '../helpers';
+import { validation } from '../../src/validation';
+import {
+  apiObjectProps,
+  createOrganization,
+  headers,
+  initialize,
+  makeClient,
+  TestClient,
+  validationError,
+} from '../helpers';
 
 let app: Application;
 let client: TestClient;
@@ -76,4 +85,104 @@ it('can create a tab-item via the contract-items endpoint', async () => {
     ...testTabItem,
   });
   expect(res.status).toBe(201);
+});
+
+it('can create a tab-item via the tab-items endpoint', async () => {
+  const { contractItem } = await createProjectAndContractItem();
+  const res = await client.post(
+    { ...testTabItem, contractItemId: contractItem.id },
+    '/tab-items',
+    defaultHeaders
+  );
+  expect(res.body).toStrictEqual({
+    ...apiObjectProps('tab-item'),
+    ...testTabItem,
+  });
+  expect(res.status).toBe(201);
+});
+
+it('cannot create tab-items for a contract-item that the users organization does not own', async () => {
+  const otherOrg = await createOrganization(client);
+  const otherHeaders = headers.userWithOrg(otherOrg.id, 'other-user');
+  let res = await client.post(testProject, `/organizations/${otherOrg.id}/projects`, otherHeaders);
+  expect(res.status).toBe(201);
+  const otherProject = res.body;
+
+  res = await client.post(
+    testContractItem,
+    `/projects/${otherProject.id}/contract-items`,
+    otherHeaders
+  );
+  expect(res.status).toBe(201);
+
+  res = await client.post(
+    { ...testTabItem, contractItemId: res.body.id },
+    '/tab-items',
+    otherHeaders
+  );
+  expect(res.status).toBe(201);
+
+  res = await client.post(
+    { ...testTabItem, contractItemId: res.body.id },
+    '/tab-items',
+    defaultHeaders
+  );
+  expect(res.status).toBe(404);
+});
+
+it('cannot create tab-items for contract-items that do not exist', async () => {
+  const res = await client.post(
+    { ...testTabItem, contractItemId: 'does-not-exist' },
+    '/tab-items',
+    defaultHeaders
+  );
+  expect(res.status).toBe(404);
+});
+
+it('cannot create a tab-item with missing properties', async () => {
+  let res = await client.post({}, '/tab-items', defaultHeaders);
+  expect(res.body.details).toContainEqual(validationError(validation.required('contractItemId')));
+  expect(res.body.details).toContainEqual(validationError(validation.required('quantity')));
+  expect(res.status).toBe(400);
+});
+
+it('cannot create a tab-item with extra properties', async () => {
+  const { contractItem } = await createProjectAndContractItem();
+  const res = await client.post(
+    {
+      ...testTabItem,
+      contractItemId: contractItem.id,
+      test: 'invalid-prop',
+    },
+    '/tab-items',
+    defaultHeaders
+  );
+  expect(res.body.details).toContainEqual(validationError(validation.extra('test')));
+  expect(res.status).toBe(400);
+});
+
+it('cannot create a tab-item with invalid properties', async () => {
+  const res = await client.post(
+    {
+      tabSet: 1,
+      quantity: '45',
+      remarks: true,
+      street: 4,
+      side: 56,
+      beginStation: 45.67,
+      endStation: 23.69,
+      contractItemId: 45,
+    },
+    '/tab-items',
+    defaultHeaders
+  );
+  expect(res.body.details).toContainEqual(validationError(validation.string('tabSet')));
+  expect(res.body.details).toContainEqual(validationError(validation.number('quantity')));
+  expect(res.body.details).toContainEqual(validationError(validation.string('remarks')));
+  expect(res.body.details).toContainEqual(validationError(validation.string('street')));
+  expect(res.body.details).toContainEqual(validationError(validation.string('side')));
+  expect(res.body.details).toContainEqual(validationError(validation.integer('beginStation')));
+  expect(res.body.details).toContainEqual(validationError(validation.integer('endStation')));
+  expect(res.body.details).toContainEqual(validationError(validation.string('contractItemId')));
+  expect(res.status).toBe(400);
 });

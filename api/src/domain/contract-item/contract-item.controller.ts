@@ -2,7 +2,7 @@ import express from 'express';
 import { addProperty, requireAuth, validateBody } from '../../middleware';
 import { Groups } from '../groups';
 import { TabItem } from '../tab-item/tab-item.entity';
-import { createTabItem } from '../tab-item/tab-item.service';
+import { createTabItem, getTabItems } from '../tab-item/tab-item.service';
 import { ContractItem } from './contract-item.entity';
 import {
   createContractItem,
@@ -55,5 +55,13 @@ router.post(
     res.status(201).sendRes(tabItem);
   }
 );
+
+router.get('/:id/tab-items', async (req, res) => {
+  const tabItems = await getTabItems({
+    user: req.user,
+    filter: { contractItem: { id: req.params.id } },
+  });
+  res.status(200).sendRes(tabItems);
+});
 
 export { router as contractItemRouter };

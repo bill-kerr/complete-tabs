@@ -80,6 +80,32 @@ export const headers = {
   }),
 };
 
+export const testProject = {
+  name: 'test-project',
+  projectNumber: 'test-project-number',
+  description: 'This is a test project',
+  client: 'test-client',
+  active: true,
+};
+
+export const testContractItem = {
+  itemNumber: '9999-9999',
+  description: 'test-description',
+  quantity: 33.35,
+  unit: 'EA',
+  unitPrice: 6667,
+};
+
+export const testTabItem = {
+  tabSet: 'test-tab-set',
+  quantity: 45.56,
+  remarks: 'Test remarks',
+  street: 'test street',
+  side: 'test side',
+  beginStation: 4565,
+  endStation: 5469,
+};
+
 export const apiObjectProps = (object: string) => ({
   id: expect.any(String),
   object,
@@ -100,4 +126,28 @@ export const createOrganization = async (
 ) => {
   const res = await client.post({ name: orgName }, '/organizations', headers.otherUser(user));
   return res.body as Organization;
+};
+
+export const createOtherTabItem = async (client: TestClient) => {
+  const otherOrg = await createOrganization(client);
+  const otherHeaders = headers.userWithOrg(otherOrg.id, 'other-user');
+  let res = await client.post(testProject, `/organizations/${otherOrg.id}/projects`, otherHeaders);
+  expect(res.status).toBe(201);
+  const otherProject = res.body;
+
+  res = await client.post(
+    testContractItem,
+    `/projects/${otherProject.id}/contract-items`,
+    otherHeaders
+  );
+  expect(res.status).toBe(201);
+
+  res = await client.post(
+    { ...testTabItem, contractItemId: res.body.id },
+    '/tab-items',
+    otherHeaders
+  );
+  expect(res.status).toBe(201);
+
+  return res.body as TabItem;
 };
