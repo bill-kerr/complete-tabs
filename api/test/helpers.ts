@@ -7,6 +7,7 @@ import { Organization } from '../src/domain/organization/organization.entity';
 import { Project } from '../src/domain/project/project.entity';
 import { ContractItem } from '../src/domain/contract-item/contract-item.entity';
 import { Estimate } from '../src/domain/estimate/estimate.entity';
+import { TabItem } from '../src/domain/tab-item/tab-item.entity';
 
 export async function initialize() {
   await connectTestDb();
@@ -18,7 +19,7 @@ export async function connectTestDb() {
     const connection = await createConnection({
       type: 'postgres',
       url: process.env.PG_CONN_STRING,
-      entities: [Organization, Project, ContractItem, Estimate],
+      entities: [Organization, Project, ContractItem, Estimate, TabItem],
       synchronize: true,
       dropSchema: true,
       namingStrategy: new SnakeNamingStrategy(),

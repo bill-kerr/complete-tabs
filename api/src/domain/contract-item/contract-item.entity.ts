@@ -1,10 +1,11 @@
 import { Exclude, Expose } from 'class-transformer';
 import { IsOptional, IsString, Length, IsNotEmpty, IsNumber, IsInt } from 'class-validator';
-import { Entity, Column, ManyToOne, Unique } from 'typeorm';
+import { Entity, Column, ManyToOne, Unique, OneToMany } from 'typeorm';
 import { ApiObject } from '../api-object';
 import { validation } from '../../validation';
 import { Groups } from '../groups';
 import { Project } from '../project/project.entity';
+import { TabItem } from '../tab-item/tab-item.entity';
 
 @Entity()
 @Unique(['itemNumber', 'project'])
@@ -68,4 +69,7 @@ export class ContractItem extends ApiObject {
 
   @ManyToOne(() => Project, project => project.contractItems, { onDelete: 'CASCADE', eager: true })
   project: Project;
+
+  @OneToMany(() => TabItem, tabItem => tabItem.contractItem)
+  tabItems: TabItem[];
 }

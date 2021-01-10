@@ -1,6 +1,8 @@
 import express from 'express';
-import { requireAuth, validateBody } from '../../middleware';
+import { addProperty, requireAuth, validateBody } from '../../middleware';
 import { Groups } from '../groups';
+import { TabItem } from '../tab-item/tab-item.entity';
+import { createTabItem } from '../tab-item/tab-item.service';
 import { ContractItem } from './contract-item.entity';
 import {
   createContractItem,
@@ -43,5 +45,15 @@ router.delete('/:id', async (req, res) => {
   await deleteContractItem(req.params.id, { user: req.user });
   return res.sendStatus(204);
 });
+
+router.post(
+  '/:id/tab-items',
+  addProperty({ key: 'id', location: 'params', destinationKey: 'contractItemId' }),
+  validateBody(TabItem, [Groups.CREATE]),
+  async (req, res) => {
+    const tabItem = await createTabItem({ user: req.user, resource: req.body }, req.params.id);
+    res.status(201).sendRes(tabItem);
+  }
+);
 
 export { router as contractItemRouter };
