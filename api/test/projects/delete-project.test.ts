@@ -74,4 +74,47 @@ it('cannot delete another organizations projects', async () => {
   expect(res.status).toBe(200);
 });
 
-it.todo('deleting a project deletes all contract-items as well');
+it('deleting a project deletes all contract-items as well', async () => {
+  const project = await createProject();
+  let res = await client.post(
+    {
+      itemNumber: 'test-item',
+      description: 'test-description',
+      quantity: 1,
+      unit: 'EA',
+      unitPrice: 1,
+      projectId: project.id,
+    },
+    '/contract-items',
+    defaultHeaders
+  );
+  expect(res.status).toBe(201);
+  const itemId = res.body.id;
+
+  res = await client.delete(`/projects/${project.id}`, defaultHeaders);
+  expect(res.status).toBe(204);
+
+  res = await client.get(`/contract-items/${itemId}`, defaultHeaders);
+  expect(res.status).toBe(404);
+});
+
+it('deleting a project deletes all estimates as well', async () => {
+  const project = await createProject();
+  let res = await client.post(
+    {
+      estimateNumber: 'test-number',
+      periodEnding: '2020-01-05',
+      projectId: project.id,
+    },
+    '/estimates',
+    defaultHeaders
+  );
+  expect(res.status).toBe(201);
+  const estimateId = res.body.id;
+
+  res = await client.delete(`/projects/${project.id}`, defaultHeaders);
+  expect(res.status).toBe(204);
+
+  res = await client.get(`/estimates/${estimateId}`, defaultHeaders);
+  expect(res.status).toBe(404);
+});

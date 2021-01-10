@@ -91,3 +91,12 @@ export const validationError = (message: string) => ({
   name: 'Validation Error',
   details: message,
 });
+
+export const createOrganization = async (
+  client: TestClient,
+  user: string = 'other-user',
+  orgName: string = 'other-org'
+) => {
+  const res = await client.post({ name: orgName }, '/organizations', headers.otherUser(user));
+  return res.body as Organization;
+};

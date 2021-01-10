@@ -13,6 +13,11 @@ export async function getEstimateById(id: string, context: ReadContext<Estimate>
   return estimate;
 }
 
+export async function getEstimates(context: ReadContext<Estimate>) {
+  const estimates = await getQuery(context).getMany();
+  return estimates;
+}
+
 export async function createEstimate(context: WriteContext<Estimate>, projectId: string) {
   const project = await getProjectById(projectId, { user: context.user });
   return createEstimateByProject(context, project);
@@ -22,6 +27,18 @@ export async function createEstimateByProject(context: WriteContext<Estimate>, p
   const estimate = Estimate.create({ ...context.resource, project });
   await estimate.persist();
   return estimate;
+}
+
+export async function updateEstimate(estimateId: string, context: WriteContext<Estimate>) {
+  const estimate = await getEstimateById(estimateId, context);
+  const updated = Estimate.merge(estimate, context.resource);
+  await updated.persist();
+  return updated;
+}
+
+export async function deleteEstimate(estimateId: string, context: ReadContext<Estimate>) {
+  const estimate = await getEstimateById(estimateId, context);
+  return estimate.delete();
 }
 
 function getQuery(context: ReadContext<Estimate>, id?: string) {

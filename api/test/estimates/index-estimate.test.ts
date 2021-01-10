@@ -57,3 +57,47 @@ it('can get an estimate', async () => {
   });
   expect(res.status).toBe(200);
 });
+
+it('returns a 404 when the estimate does not exist', async () => {
+  const res = await client.get('/estimates/does-not-exist', defaultHeaders);
+  expect(res.body).toStrictEqual({
+    object: 'error',
+    name: 'Not Found Error',
+    statusCode: 404,
+    details: 'The requested resource was not found.',
+  });
+  expect(res.status).toBe(404);
+});
+
+it('can only get estimates that belong to the users organization', async () => {
+  // Create other user's organization
+  let res = await client.post(
+    { name: 'other-org' },
+    '/organizations',
+    headers.otherUser('other-user')
+  );
+  const otherOrgId = res.body.id;
+
+  res = await client.post(
+    testProject,
+    `/organizations/${otherOrgId}/projects`,
+    headers.userWithOrg(otherOrgId, 'other-user')
+  );
+  expect(res.status).toBe(201);
+
+  res = await client.post(
+    { ...testEstimate, projectId: res.body.id },
+    '/estimates',
+    headers.userWithOrg(otherOrgId, 'other-user')
+  );
+  expect(res.status).toBe(201);
+
+  res = await client.get(
+    `/estimates/${res.body.id}`,
+    headers.userWithOrg(otherOrgId, 'other-user')
+  );
+  expect(res.status).toBe(200);
+
+  res = await client.get(`/estimates/${res.body.id}`, defaultHeaders);
+  expect(res.status).toBe(404);
+});

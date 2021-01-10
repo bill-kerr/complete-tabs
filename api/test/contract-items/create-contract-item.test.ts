@@ -172,4 +172,25 @@ it('is able to create two contract-items with the same number under different pr
   expect(res.status).toBe(201);
 });
 
-it.todo('cannot create a contract-item with invalid properties');
+it('cannot create a contract-item with invalid properties', async () => {
+  const res = await client.post(
+    {
+      itemNumber: 4444,
+      description: 4444,
+      quantity: '67',
+      unit: true,
+      unitPrice: 45.65,
+      projectId: 4567,
+    },
+    '/contract-items',
+    defaultHeaders
+  );
+
+  expect(res.body.details).toContainEqual(validationError(validation.string('itemNumber')));
+  expect(res.body.details).toContainEqual(validationError(validation.string('description')));
+  expect(res.body.details).toContainEqual(validationError(validation.number('quantity')));
+  expect(res.body.details).toContainEqual(validationError(validation.string('unit')));
+  expect(res.body.details).toContainEqual(validationError(validation.integer('unitPrice')));
+  expect(res.body.details).toContainEqual(validationError(validation.string('projectId')));
+  expect(res.status).toBe(400);
+});
