@@ -1,6 +1,6 @@
 import { Exclude, Expose } from 'class-transformer';
 import { IsBoolean, IsOptional, IsString, Length, IsNotEmpty } from 'class-validator';
-import { Entity, Column, ManyToOne, Unique, OneToMany } from 'typeorm';
+import { Entity, Column, ManyToOne, Unique, OneToMany, RelationId } from 'typeorm';
 import { ApiObject } from '../api-object';
 import { validation } from '../../validation';
 import { Groups } from '../groups';
@@ -65,7 +65,9 @@ export class Project extends ApiObject {
 
   organizationId: string;
 
-  @ManyToOne(() => Organization, org => org.projects, { onDelete: 'CASCADE', eager: true })
+  @Expose({ groups: [Groups.READ] })
+  @RelationId('organization')
+  @ManyToOne(() => Organization, org => org.projects, { onDelete: 'CASCADE' })
   organization: Organization;
 
   @OneToMany(() => ContractItem, contractItem => contractItem.project)

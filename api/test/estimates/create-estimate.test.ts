@@ -50,6 +50,7 @@ it('can create an estimate from the projects endpoint', async () => {
   expect(res.body).toStrictEqual({
     ...apiObjectProps('estimate'),
     ...testEstimate,
+    project: expect.any(String),
   });
   expect(res.status).toBe(201);
 });
@@ -64,6 +65,7 @@ it('can create an estimate from the estimates endpoint', async () => {
   expect(res.body).toStrictEqual({
     ...apiObjectProps('estimate'),
     ...testEstimate,
+    project: expect.any(String),
   });
   expect(res.status).toBe(201);
 });

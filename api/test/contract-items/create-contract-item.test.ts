@@ -53,6 +53,7 @@ it('can create a contract-item from the projects endpoint', async () => {
   expect(res.body).toStrictEqual({
     ...testItem,
     ...apiObjectProps('contract-item'),
+    project: expect.any(String),
   });
   expect(res.status).toBe(201);
 });
@@ -67,6 +68,7 @@ it('can create a contract-item from the contract-items endpoint', async () => {
   expect(res.body).toStrictEqual({
     ...testItem,
     ...apiObjectProps('contract-item'),
+    project: expect.any(String),
   });
   expect(res.status).toBe(201);
 });

@@ -1,10 +1,11 @@
 import { Exclude, Expose } from 'class-transformer';
 import { IsOptional, IsString, Length, IsNotEmpty, Validate } from 'class-validator';
-import { Entity, Column, ManyToOne, Unique } from 'typeorm';
+import { Entity, Column, ManyToOne, Unique, OneToMany, RelationId } from 'typeorm';
 import { ApiObject } from '../api-object';
 import { IsDate, validation } from '../../validation';
 import { Groups } from '../groups';
 import { Project } from '../project/project.entity';
+import { EstimateItem } from '../estimate-item/estimate-item.entity';
 
 @Entity()
 @Unique(['estimateNumber', 'project'])
@@ -41,6 +42,11 @@ export class Estimate extends ApiObject {
   @IsString({ groups: [Groups.CREATE], message: validation.string('projectId') })
   projectId: string;
 
+  @Expose({ groups: [Groups.READ] })
+  @RelationId('project')
   @ManyToOne(() => Project, project => project.contractItems, { onDelete: 'CASCADE', eager: true })
   project: Project;
+
+  @OneToMany(() => EstimateItem, estimateItem => estimateItem.contractItem)
+  estimateItems: EstimateItem[];
 }

@@ -77,6 +77,7 @@ it('can update all expected fields of an estimate', async () => {
     ...apiObjectProps('estimate'),
     estimateNumber: 'new-estimate-number',
     periodEnding: '2021-05-01',
+    project: expect.any(String),
   });
 });
 

@@ -10,12 +10,13 @@ import { Project } from './domain/project/project.entity';
 import { ContractItem } from './domain/contract-item/contract-item.entity';
 import { Estimate } from './domain/estimate/estimate.entity';
 import { TabItem } from './domain/tab-item/tab-item.entity';
+import { EstimateItem } from './domain/estimate-item/estimate-item.entity';
 
 async function startApp() {
   const app = initExpressApp();
 
   try {
-    await connectDatabase(Organization, Project, ContractItem, Estimate, TabItem);
+    await connectDatabase(Organization, Project, ContractItem, Estimate, TabItem, EstimateItem);
     console.log('API server connected to database.');
   } catch (error) {
     console.error(error);

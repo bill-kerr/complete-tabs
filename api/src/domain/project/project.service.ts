@@ -5,8 +5,10 @@ import { getOrganizationById } from '../organization/organization.service';
 import { Project } from './project.entity';
 
 export async function getProjectById(id: string, context: ReadContext<Project>) {
-  const project = await Project.findOne({ ...context.filter, id });
-  if (!project || project.organization.id !== context.user.organizationId) {
+  const project = await Project.findOne({
+    where: { ...context.filter, id, organization: { id: context.user.organizationId } },
+  });
+  if (!project) {
     throw new NotFoundError(`A project with an id of ${id} does not exist.`);
   }
   return project;

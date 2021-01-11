@@ -67,6 +67,7 @@ it('can update all expected fields of a project', async () => {
     id: expect.any(String),
     createdAt: expect.any(Number),
     updatedAt: expect.any(Number),
+    organization: expect.any(String),
     name: 'new-name',
     projectNumber: 'new-project-number',
     description: 'new-description',
@@ -90,7 +91,7 @@ it('cannot update projectNumber to an already existing one', async () => {
   expect(res.status).toBe(400);
 });
 
-it('cannot update unintended fields', async () => {
+it('cannot update unintended fields of a project', async () => {
   const project = await createProject();
 
   let res = await client.put(
@@ -122,6 +123,7 @@ it('cannot update unintended fields', async () => {
   expect(res.body).toStrictEqual({
     object: 'project',
     id: expect.any(String),
+    organization: expect.any(String),
     createdAt: expect.any(Number),
     updatedAt: expect.any(Number),
     ...testProject,

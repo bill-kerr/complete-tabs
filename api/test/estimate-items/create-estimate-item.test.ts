@@ -1,16 +1,16 @@
 import { Application } from 'express';
 import { ContractItem } from '../../src/domain/contract-item/contract-item.entity';
+import { Estimate } from '../../src/domain/estimate/estimate.entity';
 import { Project } from '../../src/domain/project/project.entity';
-import { TabItem } from '../../src/domain/tab-item/tab-item.entity';
 import {
-  createOtherTabItem,
+  apiObjectProps,
   headers,
   initialize,
   makeClient,
   TestClient,
   testContractItem,
+  testEstimate,
   testProject,
-  testTabItem,
 } from '../helpers';
 
 let app: Application;
@@ -29,6 +29,16 @@ beforeEach(async () => {
   defaultHeaders = headers.userWithOrg(orgId);
 });
 
+const testEstimateItem = {
+  tabSet: 'test-tab-set',
+  quantity: 45.56,
+  remarks: 'Test remarks',
+  street: 'test street',
+  side: 'test side',
+  beginStation: 4565,
+  endStation: 5469,
+};
+
 const createProject = async (project: Partial<Project> = testProject) => {
   const res = await client.post(project, '/projects', defaultHeaders);
   return res.body as Project;
@@ -42,31 +52,31 @@ const createContractItem = async (
   return res.body as ContractItem;
 };
 
-const createTabItem = async (contractItemId: string, item: Partial<TabItem> = testTabItem) => {
-  const res = await client.post({ ...item, contractItemId }, '/tab-items', defaultHeaders);
-  return res.body as TabItem;
+const createEstimate = async (projectId: string, estimate = testEstimate) => {
+  const res = await client.post({ ...testEstimate, projectId }, '/estimates', defaultHeaders);
+  return res.body as Estimate;
 };
 
-const createProjectAndContractItem = async () => {
+const createProjectContractItemAndEstimate = async () => {
   const project = await createProject();
   const contractItem = await createContractItem(project.id);
-  return { project, contractItem };
+  const estimate = await createEstimate(project.id);
+  return { project, contractItem, estimate };
 };
 
-it('can delete a tab-item', async () => {
-  const { contractItem } = await createProjectAndContractItem();
-  const tabItem = await createTabItem(contractItem.id);
-
-  let res = await client.delete(`/tab-items/${tabItem.id}`, defaultHeaders);
-  expect(res.status).toBe(204);
-
-  res = await client.get(`/tab-items/${tabItem.id}`, defaultHeaders);
-  expect(res.status).toBe(404);
+it('can create an estimate-item via the contract-items endpoint', async () => {
+  const { contractItem } = await createProjectContractItemAndEstimate();
+  const res = await client.post(
+    testEstimateItem,
+    `/contract-items/${contractItem.id}/estimate-items`,
+    defaultHeaders
+  );
+  expect(res.body).toStrictEqual({
+    ...apiObjectProps('estimate-item'),
+    ...testEstimateItem,
+  });
+  expect(res.status).toBe(201);
 });
 
-it('cannot delete a tab-item from another organization', async () => {
-  const otherTabItem = await createOtherTabItem(client);
-
-  let res = await client.delete(`/tab-items/${otherTabItem.id}`, defaultHeaders);
-  expect(res.status).toBe(404);
-});
+it.todo('can create an estimate-item via the estimates endpoint');
+it.todo('can create an estimate-item via the estimate-items endpoint');

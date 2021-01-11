@@ -37,6 +37,7 @@ it('can get a project that belongs the the users current organization', async ()
   expect(res.body).toStrictEqual({
     ...testProject,
     object: 'project',
+    organization: expect.any(String),
     updatedAt: expect.any(Number),
     createdAt: expect.any(Number),
     id: expect.any(String),

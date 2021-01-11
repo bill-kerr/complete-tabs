@@ -8,6 +8,7 @@ import { Project } from '../src/domain/project/project.entity';
 import { ContractItem } from '../src/domain/contract-item/contract-item.entity';
 import { Estimate } from '../src/domain/estimate/estimate.entity';
 import { TabItem } from '../src/domain/tab-item/tab-item.entity';
+import { EstimateItem } from '../src/domain/estimate-item/estimate-item.entity';
 
 export async function initialize() {
   await connectTestDb();
@@ -19,10 +20,11 @@ export async function connectTestDb() {
     const connection = await createConnection({
       type: 'postgres',
       url: process.env.PG_CONN_STRING,
-      entities: [Organization, Project, ContractItem, Estimate, TabItem],
+      entities: [Organization, Project, ContractItem, Estimate, TabItem, EstimateItem],
       synchronize: true,
       dropSchema: true,
       namingStrategy: new SnakeNamingStrategy(),
+      logging: false,
     });
 
     if (!connection.isConnected) {
@@ -104,6 +106,11 @@ export const testTabItem = {
   side: 'test side',
   beginStation: 4565,
   endStation: 5469,
+};
+
+export const testEstimate = {
+  estimateNumber: '1',
+  periodEnding: '2021-05-01',
 };
 
 export const apiObjectProps = (object: string) => ({

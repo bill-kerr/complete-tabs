@@ -83,6 +83,7 @@ it('can create a tab-item via the contract-items endpoint', async () => {
   expect(res.body).toStrictEqual({
     ...apiObjectProps('tab-item'),
     ...testTabItem,
+    contractItem: expect.any(String),
   });
   expect(res.status).toBe(201);
 });
@@ -97,6 +98,7 @@ it('can create a tab-item via the tab-items endpoint', async () => {
   expect(res.body).toStrictEqual({
     ...apiObjectProps('tab-item'),
     ...testTabItem,
+    contractItem: expect.any(String),
   });
   expect(res.status).toBe(201);
 });

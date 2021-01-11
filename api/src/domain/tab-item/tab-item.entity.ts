@@ -1,6 +1,6 @@
 import { Exclude, Expose } from 'class-transformer';
 import { IsOptional, IsString, Length, IsNotEmpty, IsNumber, IsInt } from 'class-validator';
-import { Entity, Column, ManyToOne } from 'typeorm';
+import { Entity, Column, ManyToOne, RelationId } from 'typeorm';
 import { ApiObject } from '../api-object';
 import { validation } from '../../validation';
 import { Groups } from '../groups';
@@ -78,6 +78,8 @@ export class TabItem extends ApiObject {
   @IsString({ groups: [Groups.CREATE], message: validation.string('contractItemId') })
   contractItemId: string;
 
+  @Expose({ groups: [Groups.READ] })
+  @RelationId('contractItem')
   @ManyToOne(() => ContractItem, contractItem => contractItem.tabItems, { onDelete: 'CASCADE' })
   contractItem: ContractItem;
 }

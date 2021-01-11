@@ -32,6 +32,7 @@ it('can create a project from the organizations endpoint', async () => {
     ...testProject,
     id: expect.any(String),
     object: 'project',
+    organization: expect.any(String),
     createdAt: expect.any(Number),
     updatedAt: expect.any(Number),
   });
@@ -44,6 +45,7 @@ it('can create a project from the projects endpoint', async () => {
     ...testProject,
     id: expect.any(String),
     object: 'project',
+    organization: expect.any(String),
     createdAt: expect.any(Number),
     updatedAt: expect.any(Number),
   });
