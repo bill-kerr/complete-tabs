@@ -2,8 +2,10 @@ import { Application } from 'express';
 import { ContractItem } from '../../src/domain/contract-item/contract-item.entity';
 import { Estimate } from '../../src/domain/estimate/estimate.entity';
 import { Project } from '../../src/domain/project/project.entity';
+import { validation } from '../../src/validation';
 import {
   apiObjectProps,
+  createOrganization,
   headers,
   initialize,
   makeClient,
@@ -11,6 +13,7 @@ import {
   testContractItem,
   testEstimate,
   testProject,
+  validationError,
 } from '../helpers';
 
 let app: Application;
@@ -30,13 +33,7 @@ beforeEach(async () => {
 });
 
 const testEstimateItem = {
-  tabSet: 'test-tab-set',
-  quantity: 45.56,
-  remarks: 'Test remarks',
-  street: 'test street',
-  side: 'test side',
-  beginStation: 4565,
-  endStation: 5469,
+  quantity: 45.67,
 };
 
 const createProject = async (project: Partial<Project> = testProject) => {
@@ -53,7 +50,7 @@ const createContractItem = async (
 };
 
 const createEstimate = async (projectId: string, estimate = testEstimate) => {
-  const res = await client.post({ ...testEstimate, projectId }, '/estimates', defaultHeaders);
+  const res = await client.post({ ...estimate, projectId }, '/estimates', defaultHeaders);
   return res.body as Estimate;
 };
 
@@ -65,18 +62,133 @@ const createProjectContractItemAndEstimate = async () => {
 };
 
 it('can create an estimate-item via the contract-items endpoint', async () => {
-  const { contractItem } = await createProjectContractItemAndEstimate();
+  const { contractItem, estimate } = await createProjectContractItemAndEstimate();
   const res = await client.post(
-    testEstimateItem,
+    { ...testEstimateItem, estimateId: estimate.id },
     `/contract-items/${contractItem.id}/estimate-items`,
     defaultHeaders
   );
   expect(res.body).toStrictEqual({
     ...apiObjectProps('estimate-item'),
     ...testEstimateItem,
+    estimate: expect.any(String),
+    contractItem: expect.any(String),
   });
   expect(res.status).toBe(201);
 });
 
-it.todo('can create an estimate-item via the estimates endpoint');
-it.todo('can create an estimate-item via the estimate-items endpoint');
+it('can create an estimate-item via the estimates endpoint', async () => {
+  const { contractItem, estimate } = await createProjectContractItemAndEstimate();
+  const res = await client.post(
+    { ...testEstimateItem, contractItemId: contractItem.id },
+    `/estimates/${estimate.id}/estimate-items`,
+    defaultHeaders
+  );
+  expect(res.body).toStrictEqual({
+    ...apiObjectProps('estimate-item'),
+    ...testEstimateItem,
+    estimate: expect.any(String),
+    contractItem: expect.any(String),
+  });
+  expect(res.status).toBe(201);
+});
+
+it('can create an estimate-item via the estimate-items endpoint', async () => {
+  const { contractItem, estimate } = await createProjectContractItemAndEstimate();
+  const res = await client.post(
+    { ...testEstimateItem, contractItemId: contractItem.id, estimateId: estimate.id },
+    '/estimate-items',
+    defaultHeaders
+  );
+  expect(res.body).toStrictEqual({
+    ...apiObjectProps('estimate-item'),
+    ...testEstimateItem,
+    estimate: expect.any(String),
+    contractItem: expect.any(String),
+  });
+  expect(res.status).toBe(201);
+});
+
+it('cannot create estimate-items for a contract-item that the users organization does not own', async () => {
+  const otherOrg = await createOrganization(client);
+  const otherHeaders = headers.userWithOrg(otherOrg.id, 'other-user');
+  let res = await client.post(testProject, `/organizations/${otherOrg.id}/projects`, otherHeaders);
+  expect(res.status).toBe(201);
+  const otherProject = res.body;
+
+  res = await client.post(
+    testContractItem,
+    `/projects/${otherProject.id}/contract-items`,
+    otherHeaders
+  );
+  expect(res.status).toBe(201);
+  const contractItemId = res.body.id;
+
+  res = await client.post(testEstimate, `/projects/${otherProject.id}/estimates`, otherHeaders);
+  expect(res.status).toBe(201);
+  const estimateId = res.body.id;
+
+  res = await client.post(
+    { ...testEstimateItem, contractItemId, estimateId },
+    '/estimate-items',
+    defaultHeaders
+  );
+  expect(res.status).toBe(404);
+});
+
+it('cannot create estimate-items for contract-items that do not exist', async () => {
+  const { estimate } = await createProjectContractItemAndEstimate();
+
+  let res = await client.post(
+    { ...testEstimateItem, contractItemId: 'does-not-exist', estimateId: estimate.id },
+    `/estimate-items`,
+    defaultHeaders
+  );
+  expect(res.status).toBe(404);
+});
+
+it('cannot create estimate-items for estimates that do not exist', async () => {
+  const { contractItem } = await createProjectContractItemAndEstimate();
+
+  let res = await client.post(
+    { ...testEstimateItem, contractItemId: contractItem.id, estimateId: 'does-not-exist' },
+    `/estimate-items`,
+    defaultHeaders
+  );
+  expect(res.status).toBe(404);
+});
+
+it('cannot create an estimate-item with missing properties', async () => {
+  const res = await client.post({}, '/estimate-items', defaultHeaders);
+  expect(res.body.details).toContainEqual(validationError(validation.required('contractItemId')));
+  expect(res.body.details).toContainEqual(validationError(validation.required('estimateId')));
+  expect(res.body.details).toContainEqual(validationError(validation.required('quantity')));
+  expect(res.status).toBe(400);
+});
+
+it('cannot create an estimate-item with extra properties', async () => {
+  const { estimate, contractItem } = await createProjectContractItemAndEstimate();
+  const res = await client.post(
+    {
+      ...testEstimateItem,
+      contractItemId: contractItem.id,
+      estimateId: estimate.id,
+      test: 'extra',
+    },
+    '/estimate-items'
+  );
+  expect(res.body.details).toContainEqual(validationError(validation.extra('test')));
+  expect(res.status).toBe(400);
+});
+
+it('cannot create an estimate-item with invalid properties', async () => {
+  const res = await client.post(
+    { quantity: '12', contractItemId: 12, estimateId: 12 },
+    '/estimate-items',
+    defaultHeaders
+  );
+  expect(res.body.details).toContainEqual(validationError(validation.number('quantity')));
+  expect(res.body.details).toContainEqual(validationError(validation.string('contractItemId')));
+  expect(res.body.details).toContainEqual(validationError(validation.string('estimateId')));
+  expect(res.status).toBe(400);
+});

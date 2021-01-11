@@ -113,6 +113,10 @@ export const testEstimate = {
   periodEnding: '2021-05-01',
 };
 
+export const testEstimateItem = {
+  quantity: 1,
+};
+
 export const apiObjectProps = (object: string) => ({
   id: expect.any(String),
   object,
@@ -157,4 +161,33 @@ export const createOtherTabItem = async (client: TestClient) => {
   expect(res.status).toBe(201);
 
   return res.body as TabItem;
+};
+
+export const createOtherEstimateItem = async (client: TestClient) => {
+  const otherOrg = await createOrganization(client);
+  const otherHeaders = headers.userWithOrg(otherOrg.id, 'other-user');
+  let res = await client.post(testProject, `/organizations/${otherOrg.id}/projects`, otherHeaders);
+  expect(res.status).toBe(201);
+  const otherProject = res.body;
+
+  res = await client.post(
+    testContractItem,
+    `/projects/${otherProject.id}/contract-items`,
+    otherHeaders
+  );
+  expect(res.status).toBe(201);
+  const contractItem = res.body;
+
+  res = await client.post(testEstimate, `/projects/${otherProject.id}/estimates`, otherHeaders);
+  expect(res.status).toBe(201);
+  const estimate = res.body;
+
+  res = await client.post(
+    { ...testEstimateItem, contractItemId: contractItem.id, estimateId: estimate.id },
+    '/estimate-items',
+    otherHeaders
+  );
+  expect(res.status).toBe(201);
+
+  return res.body as EstimateItem;
 };

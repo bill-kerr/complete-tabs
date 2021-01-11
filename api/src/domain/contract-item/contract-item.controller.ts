@@ -1,5 +1,7 @@
 import express from 'express';
 import { addProperty, requireAuth, validateBody } from '../../middleware';
+import { EstimateItem } from '../estimate-item/estimate-item.entity';
+import { createEstimateItem, getEstimateItems } from '../estimate-item/estimate-item.service';
 import { Groups } from '../groups';
 import { TabItem } from '../tab-item/tab-item.entity';
 import { createTabItem, getTabItems } from '../tab-item/tab-item.service';
@@ -17,12 +19,12 @@ router.use(requireAuth);
 
 router.get('/', async (req, res) => {
   const items = await getContractItems({ user: req.user });
-  res.status(200).sendRes(items);
+  return res.status(200).sendRes(items);
 });
 
 router.get('/:id', async (req, res) => {
   const contractItem = await getContractItemById(req.params.id, { user: req.user });
-  res.sendRes(contractItem);
+  return res.sendRes(contractItem);
 });
 
 router.post('/', validateBody(ContractItem, [Groups.CREATE]), async (req, res) => {
@@ -52,7 +54,7 @@ router.post(
   validateBody(TabItem, [Groups.CREATE]),
   async (req, res) => {
     const tabItem = await createTabItem({ user: req.user, resource: req.body }, req.params.id);
-    res.status(201).sendRes(tabItem);
+    return res.status(201).sendRes(tabItem);
   }
 );
 
@@ -61,7 +63,29 @@ router.get('/:id/tab-items', async (req, res) => {
     user: req.user,
     filter: { contractItem: { id: req.params.id } },
   });
-  res.status(200).sendRes(tabItems);
+  return res.status(200).sendRes(tabItems);
+});
+
+router.post(
+  '/:id/estimate-items',
+  addProperty({ key: 'id', location: 'params', destinationKey: 'contractItemId' }),
+  validateBody(EstimateItem, [Groups.CREATE]),
+  async (req, res) => {
+    const estimateItem = await createEstimateItem(
+      { user: req.user, resource: req.body },
+      req.body.contractItemId,
+      req.body.estimateId
+    );
+    return res.status(201).sendRes(estimateItem);
+  }
+);
+
+router.get('/:id/estimate-items', async (req, res) => {
+  const estimateItems = await getEstimateItems({
+    user: req.user,
+    filter: { contractItem: { id: req.params.id } },
+  });
+  return res.status(200).sendRes(estimateItems);
 });
 
 export { router as contractItemRouter };

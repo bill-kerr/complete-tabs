@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { IsOptional, IsNotEmpty, IsNumber } from 'class-validator';
+import { IsOptional, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { Entity, Column, ManyToOne, RelationId } from 'typeorm';
 import { ApiObject } from '../api-object';
 import { validation } from '../../validation';
@@ -22,15 +22,25 @@ export class EstimateItem extends ApiObject {
   @Column({ nullable: false, type: 'float' })
   quantity: number;
 
+  @Expose({ groups: [Groups.CREATE] })
+  @IsNotEmpty({ groups: [Groups.CREATE], message: validation.required('contractItemId') })
+  @IsString({ groups: [Groups.CREATE], message: validation.string('contractItemId') })
+  contractItemId: string;
+
+  @Expose({ groups: [Groups.CREATE] })
+  @IsNotEmpty({ groups: [Groups.CREATE], message: validation.required('estimateId') })
+  @IsString({ groups: [Groups.CREATE], message: validation.string('estimateId') })
+  estimateId: string;
+
+  @Expose({ groups: [Groups.READ] })
+  @RelationId('estimate')
+  @ManyToOne(() => Estimate, estimate => estimate.estimateItems, { onDelete: 'CASCADE' })
+  estimate: Estimate;
+
   @Expose({ groups: [Groups.READ] })
   @RelationId('contractItem')
   @ManyToOne(() => ContractItem, contractItem => contractItem.estimateItems, {
     onDelete: 'CASCADE',
   })
   contractItem: ContractItem;
-
-  @Expose({ groups: [Groups.READ] })
-  @RelationId('estimate')
-  @ManyToOne(() => Estimate, estimate => estimate.estimateItems, { onDelete: 'CASCADE' })
-  estimate: Estimate;
 }
