@@ -43,6 +43,24 @@ export async function createEstimateItemByContractItemAndEstimate(
   return estimateItem;
 }
 
+export async function updateEstimateItem(
+  estimateItemId: string,
+  context: WriteContext<EstimateItem>
+) {
+  const estimateItem = await getEstimateItemById(estimateItemId, context);
+  const updated = EstimateItem.merge(estimateItem, context.resource);
+  await updated.persist();
+  return updated;
+}
+
+export async function deleteEstimateItem(
+  estimateItemId: string,
+  context: ReadContext<EstimateItem>
+) {
+  const estimateItem = await getEstimateItemById(estimateItemId, context);
+  return estimateItem.delete();
+}
+
 function getQuery(context: ReadContext<EstimateItem>, id?: string) {
   const filter = id ? { ...context.filter, id } : { ...context.filter };
   return createQueryBuilder(EstimateItem, 'estimate_item')
