@@ -9,6 +9,7 @@ import { ContractItem } from '../src/domain/contract-item/contract-item.entity';
 import { Estimate } from '../src/domain/estimate/estimate.entity';
 import { TabItem } from '../src/domain/tab-item/tab-item.entity';
 import { EstimateItem } from '../src/domain/estimate-item/estimate-item.entity';
+import { CostCode } from '../src/domain/cost-code/cost-code.entity';
 
 export async function initialize() {
   await connectTestDb();
@@ -20,7 +21,7 @@ export async function connectTestDb() {
     const connection = await createConnection({
       type: 'postgres',
       url: process.env.PG_CONN_STRING,
-      entities: [Organization, Project, ContractItem, Estimate, TabItem, EstimateItem],
+      entities: [Organization, Project, ContractItem, Estimate, TabItem, EstimateItem, CostCode],
       synchronize: true,
       dropSchema: true,
       namingStrategy: new SnakeNamingStrategy(),
@@ -115,6 +116,16 @@ export const testEstimate = {
 
 export const testEstimateItem = {
   quantity: 1,
+};
+
+export const testCostCode = {
+  description: 'test-description',
+  quantity: 1,
+  unit: 'EA',
+  laborHours: 12,
+  equipmentHours: 13,
+  laborBudget: 1200,
+  equipmentBudget: 1300,
 };
 
 export const apiObjectProps = (object: string) => ({

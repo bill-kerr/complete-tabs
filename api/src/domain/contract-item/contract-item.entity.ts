@@ -7,6 +7,7 @@ import { Groups } from '../groups';
 import { Project } from '../project/project.entity';
 import { TabItem } from '../tab-item/tab-item.entity';
 import { EstimateItem } from '../estimate-item/estimate-item.entity';
+import { CostCode } from '../cost-code/cost-code.entity';
 
 @Entity()
 @Unique(['itemNumber', 'project'])
@@ -78,4 +79,7 @@ export class ContractItem extends ApiObject {
 
   @OneToMany(() => EstimateItem, estimateItem => estimateItem.contractItem)
   estimateItems: EstimateItem[];
+
+  @OneToMany(() => CostCode, costCode => costCode.contractItem)
+  costCodes: CostCode[];
 }

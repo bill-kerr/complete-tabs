@@ -11,12 +11,21 @@ import { ContractItem } from './domain/contract-item/contract-item.entity';
 import { Estimate } from './domain/estimate/estimate.entity';
 import { TabItem } from './domain/tab-item/tab-item.entity';
 import { EstimateItem } from './domain/estimate-item/estimate-item.entity';
+import { CostCode } from './domain/cost-code/cost-code.entity';
 
 async function startApp() {
   const app = initExpressApp();
 
   try {
-    await connectDatabase(Organization, Project, ContractItem, Estimate, TabItem, EstimateItem);
+    await connectDatabase(
+      Organization,
+      Project,
+      ContractItem,
+      Estimate,
+      TabItem,
+      EstimateItem,
+      CostCode
+    );
     console.log('API server connected to database.');
   } catch (error) {
     console.error(error);
