@@ -119,6 +119,7 @@ export const testEstimateItem = {
 };
 
 export const testCostCode = {
+  code: '99999-99999',
   description: 'test-description',
   quantity: 1,
   unit: 'EA',
@@ -201,4 +202,28 @@ export const createOtherEstimateItem = async (client: TestClient) => {
   expect(res.status).toBe(201);
 
   return res.body as EstimateItem;
+};
+
+export const createOtherCostCode = async (client: TestClient) => {
+  const otherOrg = await createOrganization(client);
+  const otherHeaders = headers.userWithOrg(otherOrg.id, 'other-user');
+  let res = await client.post(testProject, `/organizations/${otherOrg.id}/projects`, otherHeaders);
+  expect(res.status).toBe(201);
+  const otherProject = res.body;
+
+  res = await client.post(
+    testContractItem,
+    `/projects/${otherProject.id}/contract-items`,
+    otherHeaders
+  );
+  expect(res.status).toBe(201);
+
+  res = await client.post(
+    { ...testCostCode, contractItemId: res.body.id },
+    '/cost-codes',
+    otherHeaders
+  );
+  expect(res.status).toBe(201);
+
+  return res.body as CostCode;
 };

@@ -13,6 +13,17 @@ export class CostCode extends ApiObject {
 
   @Expose({ groups: Groups.all() })
   @IsOptional({ groups: [Groups.UPDATE] })
+  @IsNotEmpty({ groups: [Groups.CREATE], message: validation.required('code') })
+  @IsString({ groups: [Groups.CREATE, Groups.UPDATE], message: validation.string('code') })
+  @Length(1, 255, {
+    groups: [Groups.CREATE],
+    message: validation.length('code', 1, 255),
+  })
+  @Column({ nullable: false })
+  code: string;
+
+  @Expose({ groups: Groups.all() })
+  @IsOptional({ groups: [Groups.UPDATE] })
   @IsNotEmpty({ groups: [Groups.CREATE], message: validation.required('description') })
   @IsString({ groups: [Groups.CREATE, Groups.UPDATE], message: validation.string('description') })
   @Length(1, 255, {

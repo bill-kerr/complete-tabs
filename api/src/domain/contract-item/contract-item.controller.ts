@@ -1,5 +1,7 @@
 import express from 'express';
 import { addProperty, requireAuth, validateBody } from '../../middleware';
+import { CostCode } from '../cost-code/cost-code.entity';
+import { createCostCode } from '../cost-code/cost-code.service';
 import { EstimateItem } from '../estimate-item/estimate-item.entity';
 import { createEstimateItem, getEstimateItems } from '../estimate-item/estimate-item.service';
 import { Groups } from '../groups';
@@ -87,5 +89,18 @@ router.get('/:id/estimate-items', async (req, res) => {
   });
   return res.status(200).sendRes(estimateItems);
 });
+
+router.post(
+  '/:id/cost-codes',
+  addProperty({ key: 'id', location: 'params', destinationKey: 'contractItemId' }),
+  validateBody(CostCode, [Groups.CREATE]),
+  async (req, res) => {
+    const costCode = await createCostCode(
+      { user: req.user, resource: req.body },
+      req.body.contractItemId
+    );
+    return res.status(201).sendRes(costCode);
+  }
+);
 
 export { router as contractItemRouter };
