@@ -27,9 +27,9 @@ export async function createCostCodeByContractItem(
   context: WriteContext<CostCode>,
   contractItem: ContractItem
 ) {
-  const existing = await getQuery({ ...context, filter: { code: context.resource.code } }).getOne();
-  if (existing) {
-    throw new BadRequestError('A cost-code with that code already exists.');
+  const hasDuplicate = await projectHasCode(context.resource);
+  if (hasDuplicate) {
+    throw new BadRequestError('The project already has a cost code with the same code.');
   }
   const costCode = CostCode.create({ ...context.resource, contractItem });
   await costCode.persist();
@@ -47,6 +47,23 @@ function getQuery(context: ReadContext<CostCode>, id?: string) {
       { id: context.user.organizationId }
     )
     .where(filter);
+}
+
+async function projectHasCode(costCode: Partial<CostCode>) {
+  const count = await createQueryBuilder(CostCode, 'cost_code')
+    .leftJoin(ContractItem, 'target_contract_item', 'target_contract_item.id = :id', {
+      id: costCode.contractItemId,
+    })
+    .leftJoin(
+      ContractItem,
+      'contract_item',
+      'contract_item.project_id = target_contract_item.project_id'
+    )
+    .innerJoin(Project, 'project', 'project.id = target_contract_item.project_id')
+    .where('cost_code.code = :code', { code: costCode.code })
+    .getCount();
+  console.log('count', count);
+  return count > 0;
 }
 
 // async function hasDuplicate(context: WriteContext<CostCode>) {
