@@ -51,30 +51,19 @@ function getQuery(context: ReadContext<CostCode>, id?: string) {
 
 async function projectHasCode(costCode: Partial<CostCode>) {
   // get the contract item
-  const results = await createQueryBuilder(ContractItem, 'contract_item')
+  const projectQuery = createQueryBuilder(ContractItem, 'contract_item')
     .select('contract_item.project_id', 'projectId')
-    .where('contract_item.id = :id', { id: costCode.contractItemId })
-    .execute();
+    .where('contract_item.id = :id', { id: costCode.contractItemId });
 
-  if (!results || !Array.isArray(results) || !results[0]?.projectId) {
-    return false;
-  }
-  const projectId: string = results[0].projectId;
-
-  // get all cost codes whose contract items have the same project_id
-  const duplicates = await createQueryBuilder(CostCode, 'cost_code')
-    .innerJoin(
-      ContractItem,
-      'contract_item',
-      'contract_item.project_id = :projectId AND cost_code.contract_item_id = :contractItemId',
-      { projectId, contractItemId: costCode.contractItemId }
-    )
+  const count = await createQueryBuilder(CostCode, 'cost_code')
+    .innerJoin(ContractItem, 'contract_item', 'cost_code.contract_item_id = :contractItemId', {
+      contractItemId: costCode.contractItemId,
+    })
     .where('cost_code.code = :code', { code: costCode.code })
+    .andWhere(`contract_item.project_id IN (${projectQuery.getSql()})`)
     .getCount();
 
-  console.log(projectId, duplicates);
-
-  return duplicates > 0;
+  return count > 0;
 }
 
 // async function hasDuplicate(context: WriteContext<CostCode>) {
