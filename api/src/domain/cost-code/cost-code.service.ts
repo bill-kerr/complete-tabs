@@ -50,20 +50,31 @@ function getQuery(context: ReadContext<CostCode>, id?: string) {
 }
 
 async function projectHasCode(costCode: Partial<CostCode>) {
-  const count = await createQueryBuilder(CostCode, 'cost_code')
-    .leftJoin(ContractItem, 'target_contract_item', 'target_contract_item.id = :id', {
-      id: costCode.contractItemId,
-    })
-    .leftJoin(
+  // get the contract item
+  const results = await createQueryBuilder(ContractItem, 'contract_item')
+    .select('contract_item.project_id', 'projectId')
+    .where('contract_item.id = :id', { id: costCode.contractItemId })
+    .execute();
+
+  if (!results || !Array.isArray(results) || !results[0]?.projectId) {
+    return false;
+  }
+  const projectId: string = results[0].projectId;
+
+  // get all cost codes whose contract items have the same project_id
+  const duplicates = await createQueryBuilder(CostCode, 'cost_code')
+    .innerJoin(
       ContractItem,
       'contract_item',
-      'contract_item.project_id = target_contract_item.project_id'
+      'contract_item.project_id = :projectId AND cost_code.contract_item_id = :contractItemId',
+      { projectId, contractItemId: costCode.contractItemId }
     )
-    .innerJoin(Project, 'project', 'project.id = target_contract_item.project_id')
     .where('cost_code.code = :code', { code: costCode.code })
     .getCount();
-  console.log('count', count);
-  return count > 0;
+
+  console.log(projectId, duplicates);
+
+  return duplicates > 0;
 }
 
 // async function hasDuplicate(context: WriteContext<CostCode>) {
