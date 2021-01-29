@@ -71,8 +71,8 @@ it('can create an estimate-item via the contract-items endpoint', async () => {
   expect(res.body).toStrictEqual({
     ...apiObjectProps('estimate-item'),
     ...testEstimateItem,
-    estimate: expect.any(String),
-    contractItem: expect.any(String),
+    estimateId: expect.any(String),
+    contractItemId: expect.any(String),
   });
   expect(res.status).toBe(201);
 });
@@ -87,8 +87,8 @@ it('can create an estimate-item via the estimates endpoint', async () => {
   expect(res.body).toStrictEqual({
     ...apiObjectProps('estimate-item'),
     ...testEstimateItem,
-    estimate: expect.any(String),
-    contractItem: expect.any(String),
+    estimateId: expect.any(String),
+    contractItemId: expect.any(String),
   });
   expect(res.status).toBe(201);
 });
@@ -103,8 +103,8 @@ it('can create an estimate-item via the estimate-items endpoint', async () => {
   expect(res.body).toStrictEqual({
     ...apiObjectProps('estimate-item'),
     ...testEstimateItem,
-    estimate: expect.any(String),
-    contractItem: expect.any(String),
+    estimateId: expect.any(String),
+    contractItemId: expect.any(String),
   });
   expect(res.status).toBe(201);
 });

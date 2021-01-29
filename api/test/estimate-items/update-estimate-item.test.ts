@@ -84,8 +84,8 @@ it('can update all intended properties on estimate-items', async () => {
   let res = await client.put({ quantity: 3 }, `/estimate-items/${estimateItem.id}`, defaultHeaders);
   expect(res.body).toStrictEqual({
     ...apiObjectProps('estimate-item'),
-    contractItem: expect.any(String),
-    estimate: expect.any(String),
+    contractItemId: expect.any(String),
+    estimateId: expect.any(String),
     quantity: 3,
   });
   expect(res.status).toBe(200);

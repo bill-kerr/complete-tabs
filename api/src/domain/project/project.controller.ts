@@ -2,6 +2,7 @@ import express from 'express';
 import { addProperty, requireAuth, validateBody } from '../../middleware';
 import { ContractItem } from '../contract-item/contract-item.entity';
 import { createContractItem } from '../contract-item/contract-item.service';
+import { getCostCodesByProjectId } from '../cost-code/cost-code.service';
 import { Estimate } from '../estimate/estimate.entity';
 import { createEstimate } from '../estimate/estimate.service';
 import { Groups } from '../groups';
@@ -69,5 +70,12 @@ router.post(
     res.status(201).sendRes(estimate);
   }
 );
+
+router.get('/:id/cost-codes', async (req, res) => {
+  const costCodes = await getCostCodesByProjectId(req.params.id, {
+    user: req.user,
+  });
+  res.status(200).sendRes(costCodes);
+});
 
 export { router as projectRouter };

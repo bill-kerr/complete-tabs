@@ -6,16 +6,53 @@ import { getContractItemById } from '../contract-item/contract-item.service';
 import { Project } from '../project/project.entity';
 import { CostCode } from './cost-code.entity';
 
-export async function getCostCodeById(costCodeId: string, context: ReadContext<CostCode>) {
+export async function getCostCodeById(
+  costCodeId: string,
+  context: ReadContext<CostCode>,
+  loadRelations = false
+) {
   const costCode = await getQuery(context, costCodeId).getOne();
   if (!costCode) {
     throw new NotFoundError(`A tab-item with an id of ${costCodeId} does not exist.`);
   }
+
+  if (loadRelations) {
+    const filter = costCodeId ? { ...context.filter, id: costCodeId } : { ...context.filter };
+    await createQueryBuilder(CostCode, 'cost_code')
+      .loadAllRelationIds()
+      .innerJoin(ContractItem, 'contract_item', 'contract_item.id = cost_code.contract_item_id')
+      .innerJoin(
+        Project,
+        'project',
+        'project.id = contract_item.project_id AND project.organization_id = :id',
+        { id: context.user.organizationId }
+      )
+      .where(filter)
+      .getOne();
+    //console.log(result);
+  }
+
   return costCode;
 }
 
 export function getCostCodes(context: ReadContext<CostCode>) {
   return getQuery(context).getMany();
+}
+
+export async function getCostCodesByProjectId(projectId: string, context: ReadContext<CostCode>) {
+  const contractItemQuery = createQueryBuilder(ContractItem, 'contract_item')
+    .select('contract_item.id', 'contract_item_id')
+    .innerJoin(Project, 'project', 'project.organization_id = :orgId')
+    .where('contract_item.project_id = :projectId');
+
+  const costCodes = await createQueryBuilder(CostCode, 'cost_code')
+    .where(`cost_code.contract_item_id IN (${contractItemQuery.getQuery()})`)
+    .setParameters({
+      orgId: context.user.organizationId,
+      projectId,
+    })
+    .getMany();
+  return costCodes;
 }
 
 export async function createCostCode(context: WriteContext<CostCode>, contractItemId: string) {
@@ -27,13 +64,27 @@ export async function createCostCodeByContractItem(
   context: WriteContext<CostCode>,
   contractItem: ContractItem
 ) {
-  const hasDuplicate = await projectHasCode(context.resource);
-  if (hasDuplicate) {
+  const existingCode = await projectHasCode(context.resource.contractItemId, context.resource.code);
+  if (existingCode) {
     throw new BadRequestError('The project already has a cost code with the same code.');
   }
   const costCode = CostCode.create({ ...context.resource, contractItem });
   await costCode.persist();
   return costCode;
+}
+
+export async function updateCostCode(costCodeId: string, context: WriteContext<CostCode>) {
+  const costCode = await getCostCodeById(costCodeId, context, true);
+  if (context.resource.code) {
+    const existingCode = await projectHasCode(costCode.contractItemId, context.resource.code);
+    if (existingCode && costCode.id !== existingCode.id) {
+      throw new BadRequestError('The project already has a cost code with the same code.');
+    }
+  }
+
+  const updated = CostCode.merge(costCode, context.resource);
+  await updated.persist();
+  return updated;
 }
 
 function getQuery(context: ReadContext<CostCode>, id?: string) {
@@ -49,33 +100,18 @@ function getQuery(context: ReadContext<CostCode>, id?: string) {
     .where(filter);
 }
 
-async function projectHasCode(costCode: Partial<CostCode>) {
-  // get the contract item
+async function projectHasCode(contractItemId?: string, code?: string) {
   const projectQuery = createQueryBuilder(ContractItem, 'contract_item')
     .select('contract_item.project_id', 'projectId')
-    .where('contract_item.id = :id', { id: costCode.contractItemId });
+    .where('contract_item.id = :id', { id: contractItemId });
 
-  const count = await createQueryBuilder(CostCode, 'cost_code')
+  const costCode = await createQueryBuilder(CostCode, 'cost_code')
     .innerJoin(ContractItem, 'contract_item', 'cost_code.contract_item_id = :contractItemId', {
-      contractItemId: costCode.contractItemId,
+      contractItemId,
     })
-    .where('cost_code.code = :code', { code: costCode.code })
+    .where('cost_code.code = :code', { code })
     .andWhere(`contract_item.project_id IN (${projectQuery.getSql()})`)
-    .getCount();
+    .getOne();
 
-  return count > 0;
+  return costCode;
 }
-
-// async function hasDuplicate(context: WriteContext<CostCode>) {
-//   const project = await createQueryBuilder(Project, 'project')
-//     .innerJoin(ContractItem, 'contract_item', 'contract_item.project_id = project.id')
-//     .getOne();
-
-//   if (!project) {
-//     return false;
-//   }
-
-//   const count = createQueryBuilder(CostCode, 'cost_code')
-//     .where('cost_code.code = :code', { code: context.resource.code })
-//     .innerJoin(ContractItem, 'contract_item', '')
-// }

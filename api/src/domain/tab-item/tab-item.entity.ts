@@ -73,13 +73,12 @@ export class TabItem extends ApiObject {
   @Column({ nullable: true, type: 'int' })
   endStation: number;
 
-  @Expose({ groups: [Groups.CREATE] })
+  @Expose({ groups: [Groups.CREATE, Groups.READ] })
   @IsNotEmpty({ groups: [Groups.CREATE], message: validation.required('contractItemId') })
   @IsString({ groups: [Groups.CREATE], message: validation.string('contractItemId') })
+  @RelationId('contractItem')
   contractItemId: string;
 
-  @Expose({ groups: [Groups.READ] })
-  @RelationId('contractItem')
   @ManyToOne(() => ContractItem, contractItem => contractItem.tabItems, { onDelete: 'CASCADE' })
   contractItem: ContractItem;
 }

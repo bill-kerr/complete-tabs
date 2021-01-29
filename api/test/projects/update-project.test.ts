@@ -67,7 +67,7 @@ it('can update all expected fields of a project', async () => {
     id: expect.any(String),
     createdAt: expect.any(Number),
     updatedAt: expect.any(Number),
-    organization: expect.any(String),
+    organizationId: expect.any(String),
     name: 'new-name',
     projectNumber: 'new-project-number',
     description: 'new-description',
@@ -123,7 +123,7 @@ it('cannot update unintended fields of a project', async () => {
   expect(res.body).toStrictEqual({
     object: 'project',
     id: expect.any(String),
-    organization: expect.any(String),
+    organizationId: expect.any(String),
     createdAt: expect.any(Number),
     updatedAt: expect.any(Number),
     ...testProject,

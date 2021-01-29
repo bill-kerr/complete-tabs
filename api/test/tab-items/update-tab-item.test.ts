@@ -88,7 +88,7 @@ it('can update all intended properties on tab-items', async () => {
     side: 'new-side',
     beginStation: 5432,
     endStation: 12345,
-    contractItem: expect.any(String),
+    contractItemId: expect.any(String),
   });
   expect(res.status).toBe(200);
 });

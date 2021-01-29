@@ -69,7 +69,7 @@ it('can create a cost-code via the contract-items endpoint', async () => {
   expect(res.body).toStrictEqual({
     ...apiObjectProps('cost-code'),
     ...testCostCode,
-    contractItem: contractItem.id,
+    contractItemId: contractItem.id,
   });
   expect(res.status).toBe(201);
 });
@@ -84,7 +84,7 @@ it('can create a cost-code via the cost-codes endpoint', async () => {
   expect(res.body).toStrictEqual({
     ...apiObjectProps('cost-code'),
     ...testCostCode,
-    contractItem: contractItem.id,
+    contractItemId: contractItem.id,
   });
   expect(res.status).toBe(201);
 });

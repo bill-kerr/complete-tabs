@@ -63,10 +63,10 @@ export class Project extends ApiObject {
   @Column({ nullable: false })
   active: boolean;
 
-  organizationId: string;
-
   @Expose({ groups: [Groups.READ] })
   @RelationId('organization')
+  organizationId: string;
+
   @ManyToOne(() => Organization, org => org.projects, { onDelete: 'CASCADE' })
   organization: Organization;
 

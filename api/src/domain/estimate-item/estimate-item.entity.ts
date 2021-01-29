@@ -22,23 +22,21 @@ export class EstimateItem extends ApiObject {
   @Column({ nullable: false, type: 'float' })
   quantity: number;
 
-  @Expose({ groups: [Groups.CREATE] })
+  @Expose({ groups: [Groups.CREATE, Groups.READ] })
   @IsNotEmpty({ groups: [Groups.CREATE], message: validation.required('contractItemId') })
   @IsString({ groups: [Groups.CREATE], message: validation.string('contractItemId') })
+  @RelationId('contractItem')
   contractItemId: string;
 
-  @Expose({ groups: [Groups.CREATE] })
+  @Expose({ groups: [Groups.CREATE, Groups.READ] })
   @IsNotEmpty({ groups: [Groups.CREATE], message: validation.required('estimateId') })
   @IsString({ groups: [Groups.CREATE], message: validation.string('estimateId') })
+  @RelationId('estimate')
   estimateId: string;
 
-  @Expose({ groups: [Groups.READ] })
-  @RelationId('estimate')
   @ManyToOne(() => Estimate, estimate => estimate.estimateItems, { onDelete: 'CASCADE' })
   estimate: Estimate;
 
-  @Expose({ groups: [Groups.READ] })
-  @RelationId('contractItem')
   @ManyToOne(() => ContractItem, contractItem => contractItem.estimateItems, {
     onDelete: 'CASCADE',
   })

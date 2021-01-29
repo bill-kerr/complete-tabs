@@ -37,13 +37,12 @@ export class Estimate extends ApiObject {
   @Column({ type: 'date', nullable: false })
   periodEnding: Date;
 
-  @Expose({ groups: [Groups.CREATE] })
+  @Expose({ groups: [Groups.CREATE, Groups.READ] })
   @IsNotEmpty({ groups: [Groups.CREATE], message: validation.required('projectId') })
   @IsString({ groups: [Groups.CREATE], message: validation.string('projectId') })
+  @RelationId('project')
   projectId: string;
 
-  @Expose({ groups: [Groups.READ] })
-  @RelationId('project')
   @ManyToOne(() => Project, project => project.contractItems, { onDelete: 'CASCADE', eager: true })
   project: Project;
 

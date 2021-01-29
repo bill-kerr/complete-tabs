@@ -84,7 +84,7 @@ it('can update all expected fields of a contract-item', async () => {
     quantity: 53,
     unit: 'FT',
     unitPrice: 8888,
-    project: expect.any(String),
+    projectId: expect.any(String),
   });
 });
 
@@ -142,7 +142,7 @@ it('cannot update properties to invalid values', async () => {
   expect(res.body).toStrictEqual({
     ...apiObjectProps('contract-item'),
     ...item,
-    project: expect.any(String),
+    projectId: expect.any(String),
   });
 });
 
