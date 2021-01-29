@@ -6,30 +6,10 @@ import { getContractItemById } from '../contract-item/contract-item.service';
 import { Project } from '../project/project.entity';
 import { CostCode } from './cost-code.entity';
 
-export async function getCostCodeById(
-  costCodeId: string,
-  context: ReadContext<CostCode>,
-  loadRelations = false
-) {
+export async function getCostCodeById(costCodeId: string, context: ReadContext<CostCode>) {
   const costCode = await getQuery(context, costCodeId).getOne();
   if (!costCode) {
     throw new NotFoundError(`A tab-item with an id of ${costCodeId} does not exist.`);
-  }
-
-  if (loadRelations) {
-    const filter = costCodeId ? { ...context.filter, id: costCodeId } : { ...context.filter };
-    await createQueryBuilder(CostCode, 'cost_code')
-      .loadAllRelationIds()
-      .innerJoin(ContractItem, 'contract_item', 'contract_item.id = cost_code.contract_item_id')
-      .innerJoin(
-        Project,
-        'project',
-        'project.id = contract_item.project_id AND project.organization_id = :id',
-        { id: context.user.organizationId }
-      )
-      .where(filter)
-      .getOne();
-    //console.log(result);
   }
 
   return costCode;
@@ -74,7 +54,7 @@ export async function createCostCodeByContractItem(
 }
 
 export async function updateCostCode(costCodeId: string, context: WriteContext<CostCode>) {
-  const costCode = await getCostCodeById(costCodeId, context, true);
+  const costCode = await getCostCodeById(costCodeId, context);
   if (context.resource.code) {
     const existingCode = await projectHasCode(costCode.contractItemId, context.resource.code);
     if (existingCode && costCode.id !== existingCode.id) {

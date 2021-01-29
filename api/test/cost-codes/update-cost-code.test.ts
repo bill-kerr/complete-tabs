@@ -2,8 +2,10 @@ import { Application } from 'express';
 import { ContractItem } from '../../src/domain/contract-item/contract-item.entity';
 import { CostCode } from '../../src/domain/cost-code/cost-code.entity';
 import { Project } from '../../src/domain/project/project.entity';
+import { validation } from '../../src/validation';
 import {
   apiObjectProps,
+  createOtherCostCode,
   headers,
   initialize,
   makeClient,
@@ -11,6 +13,7 @@ import {
   testContractItem,
   testCostCode,
   testProject,
+  validationError,
 } from '../helpers';
 
 let app: Application;
@@ -114,4 +117,50 @@ it('cannot update a cost-codes code to an existing one in the project', async ()
     defaultHeaders
   );
   expect(res.status).toBe(400);
+});
+
+it('cannot update properties to invalid values', async () => {
+  const { contractItem } = await createProjectAndContractItem();
+  const costCode = await createCostCode(contractItem.id);
+
+  let res = await client.put({ code: 1234 }, `/cost-codes/${costCode.id}`, defaultHeaders);
+  expect(res.body.details).toContainEqual(validationError(validation.string('code')));
+
+  res = await client.put({ quantity: '56896' }, `/cost-codes/${costCode.id}`, defaultHeaders);
+  expect(res.body.details).toContainEqual(validationError(validation.number('quantity')));
+
+  res = await client.put({ description: true }, `/cost-codes/${costCode.id}`, defaultHeaders);
+  expect(res.body.details).toContainEqual(validationError(validation.string('description')));
+
+  res = await client.put({ unit: 1234 }, `/cost-codes/${costCode.id}`, defaultHeaders);
+  expect(res.body.details).toContainEqual(validationError(validation.string('unit')));
+
+  res = await client.put({ laborHours: '1234.5' }, `/cost-codes/${costCode.id}`, defaultHeaders);
+  expect(res.body.details).toContainEqual(validationError(validation.number('laborHours')));
+
+  res = await client.put(
+    { equipmentHours: '1234.5' },
+    `/cost-codes/${costCode.id}`,
+    defaultHeaders
+  );
+  expect(res.body.details).toContainEqual(validationError(validation.number('equipmentHours')));
+
+  res = await client.put({ laborBudget: 125.6 }, `/cost-codes/${costCode.id}`, defaultHeaders);
+  expect(res.body.details).toContainEqual(validationError(validation.integer('laborBudget')));
+
+  res = await client.put({ equipmentBudget: 125.6 }, `/cost-codes/${costCode.id}`, defaultHeaders);
+  expect(res.body.details).toContainEqual(validationError(validation.integer('equipmentBudget')));
+
+  res = await client.get(`/cost-codes/${costCode.id}`, defaultHeaders);
+  expect(res.body).toStrictEqual(costCode);
+});
+
+it('cannot update cost-codes from other organizations', async () => {
+  const costCode = await createOtherCostCode(client);
+  const res = await client.put(
+    { code: 'some-new-code' },
+    `/cost-codes/${costCode.id}`,
+    defaultHeaders
+  );
+  expect(res.status).toBe(404);
 });

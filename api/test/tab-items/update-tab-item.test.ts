@@ -100,22 +100,22 @@ it('cannot update properties to invalid values', async () => {
   let res = await client.put({ tabSet: 333 }, `/tab-items/${tabItem.id}`, defaultHeaders);
   expect(res.status).toBe(400);
 
-  await client.put({ quantity: '5' }, `/tab-items/${tabItem.id}`, defaultHeaders);
+  res = await client.put({ quantity: '5' }, `/tab-items/${tabItem.id}`, defaultHeaders);
   expect(res.status).toBe(400);
 
-  await client.put({ remarks: 5 }, `/tab-items/${tabItem.id}`, defaultHeaders);
+  res = await client.put({ remarks: 5 }, `/tab-items/${tabItem.id}`, defaultHeaders);
   expect(res.status).toBe(400);
 
-  await client.put({ street: 56 }, `/tab-items/${tabItem.id}`, defaultHeaders);
+  res = await client.put({ street: 56 }, `/tab-items/${tabItem.id}`, defaultHeaders);
   expect(res.status).toBe(400);
 
-  await client.put({ side: 56 }, `/tab-items/${tabItem.id}`, defaultHeaders);
+  res = await client.put({ side: 56 }, `/tab-items/${tabItem.id}`, defaultHeaders);
   expect(res.status).toBe(400);
 
-  await client.put({ beginStation: 56.23 }, `/tab-items/${tabItem.id}`, defaultHeaders);
+  res = await client.put({ beginStation: 56.23 }, `/tab-items/${tabItem.id}`, defaultHeaders);
   expect(res.status).toBe(400);
 
-  await client.put({ endStation: 0.25 }, `/tab-items/${tabItem.id}`, defaultHeaders);
+  res = await client.put({ endStation: 0.25 }, `/tab-items/${tabItem.id}`, defaultHeaders);
   expect(res.status).toBe(400);
 
   res = await client.get(`/tab-items/${tabItem.id}`, defaultHeaders);
