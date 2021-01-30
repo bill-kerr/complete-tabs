@@ -10,4 +10,6 @@ export const config = Object.freeze({
   PG_CONN_STRING: process.env.PG_CONN_STRING || '',
 
   GOOGLE_APPLICATION_CREDENTIALS: process.env.GOOGLE_APPLICATION_CREDENTIALS || '',
+
+  PAGE_SIZE: parseInt(process.env.PAGE_SIZE || '200', 10),
 });

@@ -1,5 +1,6 @@
 import express from 'express';
 import { addProperty, requireAuth, validateBody } from '../../middleware';
+import { handleQuery } from '../../middleware/handle-query';
 import { ContractItem } from '../contract-item/contract-item.entity';
 import { createContractItem } from '../contract-item/contract-item.service';
 import { getCostCodesByProjectId } from '../cost-code/cost-code.service';
@@ -23,9 +24,13 @@ router.get('/:id', async (req, res) => {
   return res.status(200).sendRes(project);
 });
 
-router.get('/', async (req, res) => {
+router.get('/', handleQuery, async (req, res) => {
+  console.log(req.queryParams);
   const projects = await getProjects({
     user: req.user,
+    baseUrl: req.baseUrl,
+    page: req.queryParams?.page,
+    limit: req.queryParams?.limit,
   });
   return res.status(200).sendRes(projects);
 });

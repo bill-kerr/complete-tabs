@@ -1,5 +1,6 @@
 import { NotFoundError } from '../../errors';
-import { ReadContext, WriteContext } from '../context';
+import { calcPagination } from '../../utils';
+import { ReadContext, ReadManyContext, WriteContext } from '../context';
 import { Organization } from '../organization/organization.entity';
 import { getOrganizationById } from '../organization/organization.service';
 import { Project } from './project.entity';
@@ -14,9 +15,10 @@ export async function getProjectById(id: string, context: ReadContext<Project>) 
   return project;
 }
 
-export async function getProjects(context: ReadContext<Project>) {
+export async function getProjects(context: ReadManyContext<Project>) {
   const projects = await Project.find({
     where: { ...context.filter, organization: { id: context.user.organizationId } },
+    ...calcPagination(context),
   });
   return projects;
 }

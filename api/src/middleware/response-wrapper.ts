@@ -10,7 +10,12 @@ export function responseWrapper(_req: Request, res: Response, next: NextFunction
 }
 
 function transform<T>(body: T | T[], groups: string[]) {
-  return Array.isArray(body)
-    ? { object: 'list', data: body.map(item => classToPlain(item, { groups })) }
-    : classToPlain(body, { groups });
+  return Array.isArray(body) ? listTransform(body, groups) : classToPlain(body, { groups });
+}
+
+function listTransform<T>(list: T[], groups: string[]) {
+  return {
+    object: 'list',
+    data: list.map(item => classToPlain(item, { groups })),
+  };
 }

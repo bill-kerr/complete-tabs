@@ -10,6 +10,12 @@ export interface ReadContext<T extends ApiObject> {
   filter?: DeepPartial<T>;
 }
 
+export interface ReadManyContext<T extends ApiObject> extends ReadContext<T> {
+  baseUrl: string;
+  page?: number;
+  limit?: number;
+}
+
 export interface WriteContext<T extends ApiObject> extends ReadContext<T> {
   resource: Partial<T>;
 }

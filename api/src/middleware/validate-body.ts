@@ -3,6 +3,7 @@ import { ClassType } from 'class-transformer/ClassTransformer';
 import { validate } from 'class-validator';
 import { Request, Response, NextFunction } from 'express';
 import { ValidationError } from '../errors';
+import { setObjectPrototype } from '../utils';
 
 export function validateBody<T>(targetClass: ClassType<T>, groups: string[] = []) {
   return async (req: Request, _res: Response, next: NextFunction) => {
@@ -18,8 +19,4 @@ export function validateBody<T>(targetClass: ClassType<T>, groups: string[] = []
     req.body = plainToClass(targetClass, req.body, { groups });
     next();
   };
-}
-
-function setObjectPrototype<T>(body: any, targetClass: ClassType<T>) {
-  return Object.setPrototypeOf(body, targetClass.prototype);
 }
