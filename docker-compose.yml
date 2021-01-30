@@ -1,12 +1,6 @@
 version: '3.8'
 
 services:
-  test-db:
-    image: postgres:alpine
-    env_file:
-      - ./api/test/test.env
-    ports:
-      - 8888:5432
   db:
     image: postgres:alpine
     env_file:
