@@ -67,6 +67,11 @@ export async function updateCostCode(costCodeId: string, context: WriteContext<C
   return updated;
 }
 
+export async function deleteCostCode(costCodeId: string, context: ReadContext<CostCode>) {
+  const costCode = await getCostCodeById(costCodeId, context);
+  return costCode.delete();
+}
+
 function getQuery(context: ReadContext<CostCode>, id?: string) {
   const filter = id ? { ...context.filter, id } : { ...context.filter };
   return createQueryBuilder(CostCode, 'cost_code')

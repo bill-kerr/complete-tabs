@@ -2,7 +2,13 @@ import express from 'express';
 import { requireAuth, validateBody } from '../../middleware';
 import { Groups } from '../groups';
 import { CostCode } from './cost-code.entity';
-import { createCostCode, getCostCodeById, getCostCodes, updateCostCode } from './cost-code.service';
+import {
+  createCostCode,
+  deleteCostCode,
+  getCostCodeById,
+  getCostCodes,
+  updateCostCode,
+} from './cost-code.service';
 
 const router = express.Router();
 router.use(requireAuth);
@@ -28,6 +34,11 @@ router.post('/', validateBody(CostCode, [Groups.CREATE]), async (req, res) => {
 router.put('/:id', validateBody(CostCode, [Groups.UPDATE]), async (req, res) => {
   const costCode = await updateCostCode(req.params.id, { user: req.user, resource: req.body });
   res.status(200).sendRes(costCode);
+});
+
+router.delete('/:id', async (req, res) => {
+  await deleteCostCode(req.params.id, { user: req.user });
+  return res.sendStatus(204);
 });
 
 export { router as costCodeRouter };
