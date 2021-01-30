@@ -1,5 +1,6 @@
 import express from 'express';
 import { requireAuth, requireMembership, validateBody } from '../../middleware';
+import { handleQuery } from '../../middleware/handle-query';
 import { Groups } from '../groups';
 import { Project } from '../project/project.entity';
 import { createProject, getProjects } from '../project/project.service';
@@ -24,8 +25,13 @@ router.post('/', validateBody(Organization, [Groups.CREATE]), async (req, res) =
   return res.status(201).sendRes(org);
 });
 
-router.get('/:id/projects', async (req, res) => {
-  const projects = await getProjects({ user: req.user });
+router.get('/:id/projects', handleQuery, async (req, res) => {
+  const projects = await getProjects({
+    user: req.user,
+    baseUrl: req.baseUrl,
+    limit: req.queryParams?.limit,
+    page: req.queryParams?.page,
+  });
   return res.status(200).sendRes(projects);
 });
 
