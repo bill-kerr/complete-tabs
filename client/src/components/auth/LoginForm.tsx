@@ -56,7 +56,7 @@ export const LoginForm: React.FC<React.HTMLAttributes<HTMLDivElement>> = props =
         validateOnChange={false}
       >
         {({ isSubmitting, errors }) => (
-          <Form className="space-y-6">
+          <Form className="space-y-8">
             <div>
               <FieldLabel label="Email" htmlFor="email" />
               <TextField
@@ -91,7 +91,7 @@ export const LoginForm: React.FC<React.HTMLAttributes<HTMLDivElement>> = props =
             <button
               type="submit"
               className={`w-full p-3 flex items-center justify-center rounded ${
-                isSubmitting ? 'bg-indigo-400' : 'bg-indigo-500'
+                isSubmitting ? 'bg-indigo-300 pointer-events-none' : 'bg-indigo-500'
               } text-white font-medium focus:ring focus:outline-none`}
             >
               {isSubmitting ? <LoadingSpinner /> : 'Log in'}
