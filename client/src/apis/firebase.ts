@@ -11,6 +11,7 @@ export enum FirebaseError {
   UserNotFound = 'user-not-found',
   ExpiredActionCode = 'expired-action-code',
   InvalidActionCode = 'invalid-action-code',
+  TooManyRequests = 'too-many-requests',
   Unknown = 'unknown-error',
 }
 
@@ -124,6 +125,8 @@ export const getFirebaseError = (error: any): FirebaseError => {
       return FirebaseError.ExpiredActionCode;
     case 'auth/invalid-action-code':
       return FirebaseError.InvalidActionCode;
+    case 'auth/too-many-requests':
+      return FirebaseError.TooManyRequests;
     default:
       console.error(error);
       return FirebaseError.Unknown;

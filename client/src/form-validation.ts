@@ -1,10 +1,12 @@
 import * as Yup from 'yup';
 
 const email = Yup.string()
-  .email('Must be a valid email address.')
+  .email('Invalid email address.')
   .required('An email address is required.');
 
-const password = Yup.string()
+const enterPassword = Yup.string().required('A password is required.');
+
+const createPassword = Yup.string()
   .min(6, 'Password must be at least 6 characters long.')
   .required('A password is required.');
 
@@ -14,8 +16,8 @@ const confirmPassword = Yup.string()
 
 export const RegisterValidationSchema = Yup.object().shape({
   email,
-  password,
+  password: createPassword,
   confirmPassword,
 });
 
-export const LoginValidationSchema = Yup.object().shape({ email, password });
+export const LoginValidationSchema = Yup.object().shape({ email, password: enterPassword });

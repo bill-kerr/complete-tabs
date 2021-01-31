@@ -5,6 +5,7 @@ import { LoginValidationSchema } from '../../form-validation';
 import { FieldLabel } from '../forms/FieldLabel';
 import { TextField } from '../forms/TextField';
 import { LoadingSpinner } from '../widgets/LoadingSpinner';
+import { WarningMessage } from '../widgets/WarningMessage';
 
 interface FormValues {
   email: string;
@@ -19,12 +20,29 @@ const initialValues: FormValues = {
 export const LoginForm: React.FC<React.HTMLAttributes<HTMLDivElement>> = props => {
   const handleSubmit = async (values: FormValues, helpers: FormikHelpers<FormValues>) => {
     const error = await signInWithEmailAndPassword(values.email, values.password);
-    if (error === FirebaseError.UserNotFound || error === FirebaseError.WrongPassword) {
-      // handle login error
+    return handleFirebaseError(error, message => helpers.setFieldError('email', message));
+  };
+
+  const handleFirebaseError = (
+    error: FirebaseError | null,
+    setError: (message: string) => void
+  ) => {
+    if (!error) {
+      return;
     }
 
-    if (error === FirebaseError.UserDisabled) {
-      helpers.setFieldError('email', 'This account has been disabled.');
+    switch (error) {
+      case FirebaseError.UserNotFound:
+      case FirebaseError.WrongPassword:
+        return setError('Incorrect email or password.');
+      case FirebaseError.UserDisabled:
+        return setError(
+          'This account has been temporarily disabled. Try again later or contact support.'
+        );
+      case FirebaseError.TooManyRequests:
+        return setError('Too many attempts. Try again later or reset your password.');
+      default:
+        return setError('An unknown error occurred. Please try again.');
     }
   };
 
@@ -34,8 +52,10 @@ export const LoginForm: React.FC<React.HTMLAttributes<HTMLDivElement>> = props =
         initialValues={initialValues}
         onSubmit={handleSubmit}
         validationSchema={LoginValidationSchema}
+        validateOnBlur={false}
+        validateOnChange={false}
       >
-        {({ isSubmitting }) => (
+        {({ isSubmitting, errors }) => (
           <Form className="space-y-6">
             <div>
               <FieldLabel label="Email" htmlFor="email" />
@@ -47,6 +67,7 @@ export const LoginForm: React.FC<React.HTMLAttributes<HTMLDivElement>> = props =
                 autoComplete="email"
                 className="mt-1 w-full"
                 tabIndex={1}
+                required
               />
             </div>
             <div>
@@ -63,8 +84,10 @@ export const LoginForm: React.FC<React.HTMLAttributes<HTMLDivElement>> = props =
                 autoComplete="password"
                 className="mt-1 w-full"
                 tabIndex={2}
+                required
               />
             </div>
+            {errors.email && <WarningMessage message={errors.email} />}
             <button
               type="submit"
               className={`w-full p-3 flex items-center justify-center rounded ${

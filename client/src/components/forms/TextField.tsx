@@ -5,13 +5,14 @@ export const TextField: React.FC<FieldHookConfig<string>> = ({ className, ...pro
 
   return (
     <input
-      className={`py-2 px-4 text-sm border border-gray-200 focus:ring focus:outline-none rounded ${className}`}
+      className={`py-2 px-3 text-sm border border-gray-200 focus:ring focus:outline-none rounded ${className}`}
       {...field}
       type={props.type}
       placeholder={props.placeholder}
       id={props.id}
       autoComplete={props.autoComplete}
       tabIndex={props.tabIndex}
+      required={props.required}
     />
   );
 };
