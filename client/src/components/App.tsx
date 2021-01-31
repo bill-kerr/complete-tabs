@@ -2,22 +2,23 @@ import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 import '../assets/css/fonts.css';
 import '../assets/css/main.css';
 import { useAuthState } from '../hooks/useAuthState';
-import { Login } from './auth/Login';
-import { Register } from './auth/Register';
+import { Login } from './pages/Login';
+import { RegisterForm } from './auth/RegisterForm';
 import { ForgotPassword } from './auth/ForgotPassword';
 import { ResetPassword } from './auth/ResetPassword';
 import { parseQuery } from '../utils';
+import { signOut } from '../apis/firebase';
 
 export const App: React.FC = () => {
   const user = useAuthState();
 
   return (
-    <BrowserRouter>
-      <Switch>
+    <div className="mx-auto max-w-screen-lg xl:max-w-screen-xl min-h-screen">
+      <BrowserRouter>
         {!user ? (
-          <>
+          <Switch>
             <Route exact path="/login" component={Login} />
-            <Route exact path="/register" component={Register} />
+            <Route exact path="/register" component={RegisterForm} />
             <Route exact path="/forgot-password" component={ForgotPassword} />
             <Route
               exact
@@ -32,11 +33,13 @@ export const App: React.FC = () => {
             <Route path="/">
               <Redirect to="/login" />
             </Route>
-          </>
+          </Switch>
         ) : (
-          <div>Logged in</div>
+          <div>
+            Logged in. <span onClick={signOut}>Log out</span>
+          </div>
         )}
-      </Switch>
-    </BrowserRouter>
+      </BrowserRouter>
+    </div>
   );
 };
