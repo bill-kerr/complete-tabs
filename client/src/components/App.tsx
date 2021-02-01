@@ -3,8 +3,8 @@ import '../assets/css/fonts.css';
 import '../assets/css/main.css';
 import { useAuthState } from '../hooks/useAuthState';
 import { Login } from './pages/Login';
-import { ForgotPassword } from './auth/ForgotPassword';
-import { ResetPassword } from './auth/ResetPassword';
+import { ForgotPassword } from './pages/ForgotPassword';
+import { ResetPassword } from './pages/ResetPassword';
 import { parseQuery } from '../utils';
 import { signOut } from '../apis/firebase';
 import { Register } from './pages/Register';
@@ -32,7 +32,7 @@ export const App: React.FC = () => {
             return user ? (
               <Redirect to="/" />
             ) : (
-              <ResetPassword email={query.email as string} oobCode={query.oobCode as string} />
+              <ResetPassword email={query.email as string} code={query.oobCode as string} />
             );
           }}
         />

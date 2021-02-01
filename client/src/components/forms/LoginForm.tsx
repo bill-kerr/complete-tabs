@@ -2,10 +2,10 @@ import { Formik, Form, FormikHelpers } from 'formik';
 import { Link } from 'react-router-dom';
 import { FirebaseError, signInWithEmailAndPassword } from '../../apis/firebase';
 import { LoginValidationSchema } from '../../form-validation';
-import { FieldLabel } from '../forms/FieldLabel';
-import { TextField } from '../forms/TextField';
+import { FieldLabel } from './FieldLabel';
+import { TextField } from './TextField';
 import { LoadingSpinner } from '../widgets/LoadingSpinner';
-import { WarningMessage } from '../widgets/WarningMessage';
+import { FieldErrorMessage } from './FieldErrorMessage';
 
 interface FormValues {
   email: string;
@@ -20,7 +20,9 @@ const initialValues: FormValues = {
 export const LoginForm: React.FC<React.HTMLAttributes<HTMLDivElement>> = props => {
   const handleSubmit = async (values: FormValues, helpers: FormikHelpers<FormValues>) => {
     const error = await signInWithEmailAndPassword(values.email, values.password);
-    return handleFirebaseError(error, message => helpers.setFieldError('email', message));
+    return handleFirebaseError(error, message => {
+      helpers.setErrors({ email: message, password: message });
+    });
   };
 
   const handleFirebaseError = (
@@ -52,11 +54,9 @@ export const LoginForm: React.FC<React.HTMLAttributes<HTMLDivElement>> = props =
         initialValues={initialValues}
         onSubmit={handleSubmit}
         validationSchema={LoginValidationSchema}
-        validateOnBlur={false}
-        validateOnChange={false}
       >
-        {({ isSubmitting, errors }) => (
-          <Form className="space-y-8">
+        {({ isSubmitting, errors, touched }) => (
+          <Form className="space-y-4">
             <div>
               <FieldLabel label="Email" htmlFor="email" />
               <TextField
@@ -65,10 +65,13 @@ export const LoginForm: React.FC<React.HTMLAttributes<HTMLDivElement>> = props =
                 placeholder="name@example.com"
                 type="text"
                 autoComplete="email"
-                className="mt-1 w-full"
+                className={`mt-1 w-full ${errors.email && touched.email && 'border-red-400'}`}
                 tabIndex={1}
                 required
               />
+              <div className="mt-1 h-3">
+                <FieldErrorMessage name="email" />
+              </div>
             </div>
             <div>
               <div className="flex justify-between items-center">
@@ -82,12 +85,14 @@ export const LoginForm: React.FC<React.HTMLAttributes<HTMLDivElement>> = props =
                 type="password"
                 id="password"
                 autoComplete="password"
-                className="mt-1 w-full"
+                className={`mt-1 w-full ${errors.password && touched.password && 'border-red-400'}`}
                 tabIndex={2}
                 required
               />
+              <div className="mt-1 h-3">
+                <FieldErrorMessage name="password" />
+              </div>
             </div>
-            {errors.email && <WarningMessage message={errors.email} />}
             <button
               type="submit"
               className={`w-full p-3 flex items-center justify-center rounded ${

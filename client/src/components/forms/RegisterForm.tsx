@@ -1,11 +1,10 @@
 import { Formik, Form, FormikHelpers } from 'formik';
 import { FirebaseError, registerUser } from '../../apis/firebase';
 import { RegisterValidationSchema } from '../../form-validation';
-import { FieldErrorMessage } from '../forms/FieldErrorMessage';
-import { FieldLabel } from '../forms/FieldLabel';
-import { TextField } from '../forms/TextField';
+import { FieldErrorMessage } from './FieldErrorMessage';
+import { FieldLabel } from './FieldLabel';
+import { TextField } from './TextField';
 import { LoadingSpinner } from '../widgets/LoadingSpinner';
-import { WarningMessage } from '../widgets/WarningMessage';
 
 interface FormValues {
   email: string;

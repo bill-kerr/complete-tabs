@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
-import { LoginForm } from '../auth/LoginForm';
+import { LoginForm } from '../forms/LoginForm';
 import { FullLogo } from '../svg/logos/FullLogo';
-import { PageContainer } from './PageContainer';
+import { PageContainer } from '../layout/PageContainer';
 
 export const Login: React.FC = () => {
   return (

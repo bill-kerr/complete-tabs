@@ -1,5 +1,5 @@
 import { ErrorMessage, ErrorMessageProps } from 'formik';
-import { IconExclamation } from '../svg/icons/IconExclamation';
+import { IconExclamation } from '../svg/icons';
 
 export const FieldErrorMessage: React.FC<ErrorMessageProps> = props => {
   const renderMessage = (msg: string) => (

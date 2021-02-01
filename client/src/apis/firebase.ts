@@ -12,6 +12,7 @@ export enum FirebaseError {
   ExpiredActionCode = 'expired-action-code',
   InvalidActionCode = 'invalid-action-code',
   TooManyRequests = 'too-many-requests',
+  ArgumentError = 'argument-error',
   Unknown = 'unknown-error',
 }
 
@@ -127,6 +128,8 @@ export const getFirebaseError = (error: any): FirebaseError => {
       return FirebaseError.InvalidActionCode;
     case 'auth/too-many-requests':
       return FirebaseError.TooManyRequests;
+    case 'auth/argument-error':
+      return FirebaseError.ArgumentError;
     default:
       console.error(error);
       return FirebaseError.Unknown;

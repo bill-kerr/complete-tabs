@@ -21,3 +21,10 @@ export const RegisterValidationSchema = Yup.object().shape({
 });
 
 export const LoginValidationSchema = Yup.object().shape({ email, password: enterPassword });
+
+export const ForgotPasswordValidationSchema = Yup.object().shape({ email });
+
+export const ResetPasswordValidationSchema = Yup.object().shape({
+  password: createPassword,
+  confirmPassword,
+});
