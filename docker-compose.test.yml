@@ -22,4 +22,4 @@ services:
       - PG_CONN_STRING=postgres://postgres:password@db:5432/complete_tabs
     volumes:
       - ./api/coverage:/coverage
-    command: npm run test
+    command: npm run test:coverage
