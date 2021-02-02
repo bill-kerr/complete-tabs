@@ -1,5 +1,7 @@
 # Complete Tabs
 
+<a href="https://travis-ci.com/github/bk7987/complete-tabs"><img src="https://travis-ci.com/bk7987/complete-tabs.svg?branch=master" /></a>
+
 Complete Tabs is a construction project data API and client. It was created to allow construction companies to upload contract and plan data to a central location and allow detailed analysis of the data via sorting, filtering, and searching.
 
 ## **The API**
