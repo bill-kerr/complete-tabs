@@ -12,7 +12,8 @@
     "testEnvironment": "node",
     "setupFilesAfterEnv": [
       "./test/setup.ts"
-    ]
+    ],
+    "coverageDirectory": "./coverage"
   },
   "dependencies": {
     "body-parser": "^1.19.0",

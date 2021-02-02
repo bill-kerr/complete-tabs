@@ -1,51 +1,19 @@
-import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import '../assets/css/fonts.css';
 import '../assets/css/main.css';
 import { useAuthState } from '../hooks/useAuthState';
-import { Login } from './pages/Login';
-import { ForgotPassword } from './pages/ForgotPassword';
-import { ResetPassword } from './pages/ResetPassword';
-import { parseQuery } from '../utils';
-import { signOut } from '../apis/firebase';
-import { Register } from './pages/Register';
+import { useWaitForSignIn } from '../hooks/useWaitForSignIn';
+import { AllRoutes } from './routing/AllRoutes';
 
 export const App: React.FC = () => {
+  const waiting = useWaitForSignIn();
   const user = useAuthState();
 
-  return (
+  return waiting ? (
+    <div>loading...</div>
+  ) : (
     <BrowserRouter>
-      <Switch>
-        <Route exact path="/login">
-          {user ? <Redirect to="/" /> : <Login />}
-        </Route>
-        <Route exact path="/register">
-          {user ? <Redirect to="/" /> : <Register />}
-        </Route>
-        <Route exact path="/forgot-password">
-          {user ? <Redirect to="/" /> : <ForgotPassword />}
-        </Route>
-        <Route
-          exact
-          path="/reset-password"
-          render={props => {
-            const query = parseQuery(props.location.search);
-            return user ? (
-              <Redirect to="/" />
-            ) : (
-              <ResetPassword email={query.email as string} code={query.oobCode as string} />
-            );
-          }}
-        />
-        <Route path="/">
-          {user ? (
-            <div>
-              Logged in. <span onClick={signOut}>Log out</span>
-            </div>
-          ) : (
-            <Redirect to="/login" />
-          )}
-        </Route>
-      </Switch>
+      <AllRoutes user={user} />
     </BrowserRouter>
   );
 };
