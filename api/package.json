@@ -3,7 +3,8 @@
   "author": "Bill Kerr",
   "scripts": {
     "dev": "nodemon --ignore ./**/*.test.ts --legacy-watch --exec ts-node --files ./src/app.ts",
-    "test": "set NODE_ENV=test && jest --watchAll --no-cache --passWithNoTests --runInBand",
+    "test": "set NODE_ENV=test && jest --no-cache --passWithNoTests --runInBand",
+    "test:watch": "set NODE_ENV=test && jest --watchAll --no-cache --passWithNoTests --runInBand",
     "test:coverage": "set NODE_ENV=test && jest --watchAll --no-cache --passWithNoTests --runInBand --coverage"
   },
   "jest": {

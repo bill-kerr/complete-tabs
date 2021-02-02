@@ -25,7 +25,6 @@ router.get('/:id', async (req, res) => {
 });
 
 router.get('/', handleQuery, async (req, res) => {
-  console.log(req.queryParams);
   const projects = await getProjects({
     user: req.user,
     baseUrl: req.baseUrl,
