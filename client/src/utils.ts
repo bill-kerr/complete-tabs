@@ -23,3 +23,7 @@ export const waitForSignIn = (): Promise<void> => {
     setTimeout(async () => resolve(), EXPECT_SIGN_IN_TIMEOUT);
   });
 };
+
+export const escapePath = (path: string) => {
+  return path.replace(/([.+*?=^!:${}()[\]|/\\])/g, '\\$1');
+};
