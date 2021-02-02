@@ -20,4 +20,6 @@ services:
       - 3333:3333
     environment:
       - PG_CONN_STRING=postgres://postgres:password@db:5432/complete_tabs
+    volumes:
+      - ./api/coverage:/coverage
     command: npm run test
