@@ -17,15 +17,13 @@ export const SidebarLink: React.FC<SidebarLinkProps> = ({ icon, text, ...props }
   return (
     <Link
       exact
-      activeClassName="bg-indigo-50"
-      className="py-2 px-4 flex items-center group text-sm"
+      activeClassName="bg-gray-200 hover:bg-gray-200"
+      className="py-3 px-4 flex items-center group text-sm rounded-md hover:bg-gray-100"
       {...props}
     >
       {renderedIcon}
       <span
-        className={`ml-2 ${
-          isActive ? 'text-indigo-800 font-bold' : 'text-gray-700 group-hover:text-gray-800'
-        }`}
+        className={`ml-4 ${isActive ? 'font-bold' : 'text-gray-700 group-hover:text-gray-800'}`}
       >
         {text}
       </span>
@@ -34,7 +32,7 @@ export const SidebarLink: React.FC<SidebarLinkProps> = ({ icon, text, ...props }
 };
 
 const getIcon = (iconType: IconType, isActive: boolean) => {
-  const baseClasses = 'h-4 w-4';
+  const baseClasses = 'h-5 w-5';
   const inactiveClasses = 'text-gray-600 group-hover:text-gray-800';
   const activeClasses = 'text-indigo-600';
   const iconClasses = `${baseClasses} ${isActive ? activeClasses : inactiveClasses}`;

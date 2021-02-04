@@ -4,3 +4,4 @@ export { IconExclamation } from './IconExclamation';
 export { IconLink } from './IconLink';
 export { IconOfficeBuilding } from './IconOfficeBuilding';
 export { IconHome } from './IconHome';
+export { IconUserCircle } from './IconUserCircle';

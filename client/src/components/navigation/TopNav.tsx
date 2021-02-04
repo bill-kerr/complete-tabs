@@ -1,8 +1,10 @@
+import { UserMenu } from '../menus/UserMenu';
+
 export const TopNav: React.FC = () => {
   return (
-    <div className="fixed w-full flex items-center justify-between bg-white border-b border-gray-100">
+    <nav className="py-2 px-4 flex items-center justify-between bg-white border-b border-gray-100">
       <div>test</div>
-      <div>icons</div>
-    </div>
+      <UserMenu />
+    </nav>
   );
 };

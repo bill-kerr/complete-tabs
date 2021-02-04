@@ -10,8 +10,7 @@ export const Link: React.FC<LinkProps> = props => {
   return (
     <NavLink
       isActive={params => {
-        const matches = params?.path === escapePath(location.pathname);
-        return matches;
+        return params?.path === escapePath(location.pathname);
       }}
       {...props}
     />
