@@ -20,6 +20,20 @@ services:
     volumes:
       - /app/node_modules
       - ./api:/app
+  client:
+    depends_on:
+      - api
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    ports:
+      - 3000:3000
+      - 3001:3001
+    environment:
+      - CHOKIDAR_USEPOLLING=1
+    volumes:
+      - /app/node_modules
+      - ./client:/app
 
 volumes:
   pgdata-complete_tabs:
