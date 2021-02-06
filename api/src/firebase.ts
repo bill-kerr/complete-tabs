@@ -42,7 +42,7 @@ export async function createUser(
 }
 
 export async function createOrganizationClaim(user: User, organizationId: string) {
-  if (user.organizationId !== '') {
+  if (user.organizationId !== '' && organizationId !== '') {
     handleFirebaseError(FirebaseError.HAS_ORGANIZATION);
   }
 

@@ -24,3 +24,7 @@ export async function getOrganizations(context: ReadContext<Organization>) {
   const orgs = await Organization.find(context.filter);
   return orgs;
 }
+
+export async function leaveOrganization(context: ReadContext<Organization>) {
+  return createOrganizationClaim(context.user, '');
+}

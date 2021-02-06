@@ -16,11 +16,11 @@ import { costCodeRouter } from '../domain/cost-code/cost-code.controller';
 
 export function initExpressApp() {
   const app = express();
+  app.use(cors());
   app.use(responseWrapper);
   app.use(methodChecker);
   app.use(verifyJson);
   app.use(helmet());
-  app.use(cors());
   app.use(json());
 
   const v1 = express.Router();

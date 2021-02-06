@@ -5,7 +5,7 @@ import { Groups } from '../groups';
 import { Project } from '../project/project.entity';
 import { createProject, getProjects } from '../project/project.service';
 import { Organization } from './organization.entity';
-import { createOrganization, getOrganizationById } from './organization.service';
+import { createOrganization, getOrganizationById, leaveOrganization } from './organization.service';
 
 const router = express.Router();
 router.use(requireAuth);
@@ -18,6 +18,11 @@ router.get('/:id', requireMembership(), async (req, res) => {
 router.get('/', async (req, res) => {
   const org = await getOrganizationById(req.user.organizationId, { user: req.user });
   return res.status(200).sendRes(org);
+});
+
+router.delete('/', async (req, res) => {
+  await leaveOrganization({ user: req.user });
+  return res.sendStatus(204);
 });
 
 router.post('/', validateBody(Organization, [Groups.CREATE]), async (req, res) => {
