@@ -4,6 +4,7 @@ import '../assets/css/main.css';
 import { useAuthState } from '../hooks/useAuthState';
 import { useWaitForSignIn } from '../hooks/useWaitForSignIn';
 import { AllRoutes } from './routing/AllRoutes';
+import { AuthContext } from '../context';
 
 export const App: React.FC = () => {
   const waiting = useWaitForSignIn();
@@ -13,7 +14,9 @@ export const App: React.FC = () => {
     <div>loading...</div>
   ) : (
     <BrowserRouter>
-      <AllRoutes user={user} />
+      <AuthContext.Provider value={user}>
+        <AllRoutes />
+      </AuthContext.Provider>
     </BrowserRouter>
   );
 };

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { onAuthStateChanged } from '../apis/firebase';
+import { getOrganizationClaim, onAuthStateChanged } from '../apis/firebase';
 import { User } from '../models/User';
 import { setExpectSignIn } from '../utils';
 
@@ -9,7 +9,10 @@ export const useAuthState = (initialUser: User | null = null) => {
   useEffect(
     () =>
       onAuthStateChanged(newUser => {
-        setUser(newUser);
+        getOrganizationClaim().then(orgId => {
+          newUser = newUser ? { ...newUser, organizationId: orgId } : null;
+          setUser(newUser);
+        });
         setExpectSignIn(!!newUser);
       }),
     [onAuthStateChanged]

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Switch, Route, Redirect } from 'react-router';
-import { User } from '../../models/User';
+import { AuthContext } from '../../context';
 import { parseQuery } from '../../utils';
 import { Dashboard } from '../pages/Dashboard';
 import { ForgotPassword } from '../pages/ForgotPassword';
@@ -10,11 +10,9 @@ import { ResetPassword } from '../pages/ResetPassword';
 import { ProtectedRoute } from './ProtectedRoute';
 import { UnprotectedRoute } from './UnprotectedRoute';
 
-interface AllRoutesProps {
-  user: User | null;
-}
+export const AllRoutes: React.FC = () => {
+  const user = useContext(AuthContext);
 
-export const AllRoutes: React.FC<AllRoutesProps> = ({ user }) => {
   return (
     <Switch>
       <UnprotectedRoute exact path="/login" component={Login} user={user} />
