@@ -3,7 +3,6 @@ import { createConnection } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import request from 'supertest';
 import { initExpressApp } from '../src/loaders/express';
-import { Organization } from '../src/domain/organization/organization.entity';
 import { Project } from '../src/domain/project/project.entity';
 import { ContractItem } from '../src/domain/contract-item/contract-item.entity';
 import { Estimate } from '../src/domain/estimate/estimate.entity';
@@ -21,7 +20,7 @@ export async function connectTestDb() {
     const connection = await createConnection({
       type: 'postgres',
       url: process.env.PG_CONN_STRING,
-      entities: [Organization, Project, ContractItem, Estimate, TabItem, EstimateItem, CostCode],
+      entities: [Project, ContractItem, Estimate, TabItem, EstimateItem, CostCode],
       synchronize: true,
       dropSchema: true,
       namingStrategy: new SnakeNamingStrategy(),
@@ -60,12 +59,12 @@ export function makeClient(baseUrl: string, defaultHeaders: {}, app: Application
 export type TestClient = ReturnType<typeof makeClient>;
 
 const defaultHeaders = {
-  Authorization: 'Bearer test-id',
+  Authorization: 'Bearer user:test-id',
   'Content-Type': 'application/json',
 };
 export const headers = {
   default: defaultHeaders,
-  otherUser: (userId: string = 'other-user') => ({
+  otherUser: (userId: string = 'user:other-user') => ({
     ...defaultHeaders,
     Authorization: `Bearer ${userId}`,
   }),
@@ -77,10 +76,6 @@ export const headers = {
     ...defaultHeaders,
     Authorization: 'Bearer fail:expired',
   },
-  userWithOrg: (orgId: string, userId: string = 'test-id') => ({
-    ...defaultHeaders,
-    Authorization: `Bearer org:${orgId} user:${userId}`,
-  }),
 };
 
 export const testProject = {
@@ -142,33 +137,22 @@ export const validationError = (message: string) => ({
   details: message,
 });
 
-export const createOrganization = async (
-  client: TestClient,
-  user: string = 'other-user',
-  orgName: string = 'other-org'
-) => {
-  const res = await client.post({ name: orgName }, '/organizations', headers.otherUser(user));
-  return res.body as Organization;
-};
-
 export const createOtherTabItem = async (client: TestClient) => {
-  const otherOrg = await createOrganization(client);
-  const otherHeaders = headers.userWithOrg(otherOrg.id, 'other-user');
-  let res = await client.post(testProject, `/organizations/${otherOrg.id}/projects`, otherHeaders);
+  let res = await client.post(testProject, `/projects`, headers.otherUser());
   expect(res.status).toBe(201);
   const otherProject = res.body;
 
   res = await client.post(
     testContractItem,
     `/projects/${otherProject.id}/contract-items`,
-    otherHeaders
+    headers.otherUser()
   );
   expect(res.status).toBe(201);
 
   res = await client.post(
     { ...testTabItem, contractItemId: res.body.id },
     '/tab-items',
-    otherHeaders
+    headers.otherUser()
   );
   expect(res.status).toBe(201);
 
@@ -176,28 +160,30 @@ export const createOtherTabItem = async (client: TestClient) => {
 };
 
 export const createOtherEstimateItem = async (client: TestClient) => {
-  const otherOrg = await createOrganization(client);
-  const otherHeaders = headers.userWithOrg(otherOrg.id, 'other-user');
-  let res = await client.post(testProject, `/organizations/${otherOrg.id}/projects`, otherHeaders);
+  let res = await client.post(testProject, `/projects`, headers.otherUser());
   expect(res.status).toBe(201);
   const otherProject = res.body;
 
   res = await client.post(
     testContractItem,
     `/projects/${otherProject.id}/contract-items`,
-    otherHeaders
+    headers.otherUser()
   );
   expect(res.status).toBe(201);
   const contractItem = res.body;
 
-  res = await client.post(testEstimate, `/projects/${otherProject.id}/estimates`, otherHeaders);
+  res = await client.post(
+    testEstimate,
+    `/projects/${otherProject.id}/estimates`,
+    headers.otherUser()
+  );
   expect(res.status).toBe(201);
   const estimate = res.body;
 
   res = await client.post(
     { ...testEstimateItem, contractItemId: contractItem.id, estimateId: estimate.id },
     '/estimate-items',
-    otherHeaders
+    headers.otherUser()
   );
   expect(res.status).toBe(201);
 
@@ -205,23 +191,21 @@ export const createOtherEstimateItem = async (client: TestClient) => {
 };
 
 export const createOtherCostCode = async (client: TestClient) => {
-  const otherOrg = await createOrganization(client);
-  const otherHeaders = headers.userWithOrg(otherOrg.id, 'other-user');
-  let res = await client.post(testProject, `/organizations/${otherOrg.id}/projects`, otherHeaders);
+  let res = await client.post(testProject, `/projects`, headers.otherUser());
   expect(res.status).toBe(201);
   const otherProject = res.body;
 
   res = await client.post(
     testContractItem,
     `/projects/${otherProject.id}/contract-items`,
-    otherHeaders
+    headers.otherUser()
   );
   expect(res.status).toBe(201);
 
   res = await client.post(
     { ...testCostCode, contractItemId: res.body.id },
     '/cost-codes',
-    otherHeaders
+    headers.otherUser()
   );
   expect(res.status).toBe(201);
 

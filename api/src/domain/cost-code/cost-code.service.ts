@@ -22,13 +22,13 @@ export function getCostCodes(context: ReadContext<CostCode>) {
 export async function getCostCodesByProjectId(projectId: string, context: ReadContext<CostCode>) {
   const contractItemQuery = createQueryBuilder(ContractItem, 'contract_item')
     .select('contract_item.id', 'contract_item_id')
-    .innerJoin(Project, 'project', 'project.organization_id = :orgId')
+    .innerJoin(Project, 'project', 'project.user_id = :userId')
     .where('contract_item.project_id = :projectId');
 
   const costCodes = await createQueryBuilder(CostCode, 'cost_code')
     .where(`cost_code.contract_item_id IN (${contractItemQuery.getQuery()})`)
     .setParameters({
-      orgId: context.user.organizationId,
+      userId: context.user.id,
       projectId,
     })
     .getMany();
@@ -79,8 +79,8 @@ function getQuery(context: ReadContext<CostCode>, id?: string) {
     .innerJoin(
       Project,
       'project',
-      'project.id = contract_item.project_id AND project.organization_id = :id',
-      { id: context.user.organizationId }
+      'project.id = contract_item.project_id AND project.user_id = :id',
+      { id: context.user.id }
     )
     .where(filter);
 }

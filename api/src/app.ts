@@ -5,7 +5,6 @@ import { config } from './config';
 import { connectDatabase } from './loaders/database';
 import { initFirebase } from './firebase';
 import { initExpressApp } from './loaders/express';
-import { Organization } from './domain/organization/organization.entity';
 import { Project } from './domain/project/project.entity';
 import { ContractItem } from './domain/contract-item/contract-item.entity';
 import { Estimate } from './domain/estimate/estimate.entity';
@@ -17,15 +16,7 @@ async function startApp() {
   const app = initExpressApp();
 
   try {
-    await connectDatabase(
-      Organization,
-      Project,
-      ContractItem,
-      Estimate,
-      TabItem,
-      EstimateItem,
-      CostCode
-    );
+    await connectDatabase(Project, ContractItem, Estimate, TabItem, EstimateItem, CostCode);
     console.log('API server connected to database.');
   } catch (error) {
     console.error(error);

@@ -5,7 +5,7 @@ class FirebaseError extends Error {
 }
 
 async function verifyIdToken(token: string) {
-  const { org, user } = parseToken(token);
+  const { user } = parseToken(token);
 
   switch (token) {
     case 'fail:invalid':
@@ -16,7 +16,6 @@ async function verifyIdToken(token: string) {
       return {
         uid: user,
         email: 'test@test.com',
-        organizationId: org,
       };
   }
 }
@@ -24,7 +23,6 @@ async function verifyIdToken(token: string) {
 function parseToken(token: string) {
   return {
     user: findInString(token, 'user:') || 'test-id',
-    org: findInString(token, 'org:') || '',
   };
 }
 
@@ -50,14 +48,9 @@ async function createUser(properties: { uid?: string; email?: string; password?:
   };
 }
 
-async function setCustomUserClaims(_uid: string, _customUserClaims: object | null) {
-  return;
-}
-
 export default {
   auth: () => ({
     verifyIdToken,
     createUser,
-    setCustomUserClaims,
   }),
 };

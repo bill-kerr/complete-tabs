@@ -47,14 +47,12 @@ export async function deleteTabItem(tabItemId: string, context: ReadContext<TabI
 function getQuery(context: ReadContext<TabItem>, id?: string) {
   const filter = id ? { ...context.filter, id } : { ...context.filter };
   return createQueryBuilder(TabItem, 'tab_item')
-    .innerJoin(ContractItem, 'contract_item', 'contract_item.id = tab_item.contract_item_id', {
-      id: context.user.organizationId,
-    })
+    .innerJoin(ContractItem, 'contract_item', 'contract_item.id = tab_item.contract_item_id')
     .innerJoin(
       Project,
       'project',
-      'project.id = contract_item.project_id AND project.organization_id = :id',
-      { id: context.user.organizationId }
+      'project.id = contract_item.project_id AND project.user_id = :id',
+      { id: context.user.id }
     )
     .where(filter);
 }

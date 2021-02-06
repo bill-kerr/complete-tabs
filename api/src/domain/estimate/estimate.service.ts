@@ -44,11 +44,8 @@ export async function deleteEstimate(estimateId: string, context: ReadContext<Es
 function getQuery(context: ReadContext<Estimate>, id?: string) {
   const filter = id ? { ...context.filter, id } : { ...context.filter };
   return createQueryBuilder(Estimate, 'estimate')
-    .innerJoin(
-      Project,
-      'project',
-      'project.id = estimate.project_id AND project.organization_id = :id',
-      { id: context.user.organizationId }
-    )
+    .innerJoin(Project, 'project', 'project.id = estimate.project_id AND project.user_id = :id', {
+      id: context.user.id,
+    })
     .where(filter);
 }

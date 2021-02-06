@@ -12,18 +12,10 @@ import {
 
 let app: Application;
 let client: TestClient;
-let orgId: string;
-let defaultHeaders: ReturnType<typeof headers.userWithOrg>;
 
 beforeAll(async () => {
   app = await initialize();
   client = makeClient('/api/v1', headers.default, app);
-});
-
-beforeEach(async () => {
-  const res = await client.post({ name: 'test-org' }, '/organizations');
-  orgId = res.body.id;
-  defaultHeaders = headers.userWithOrg(orgId);
 });
 
 const testProject = {
@@ -43,13 +35,17 @@ const testItem = {
 };
 
 const createProject = async (project: Partial<Project> = testProject) => {
-  const res = await client.post(project, '/projects', defaultHeaders);
+  const res = await client.post(project, '/projects', headers.default);
   return res.body as Project;
 };
 
 it('can create a contract-item from the projects endpoint', async () => {
   const project = await createProject();
-  const res = await client.post(testItem, `/projects/${project.id}/contract-items`, defaultHeaders);
+  const res = await client.post(
+    testItem,
+    `/projects/${project.id}/contract-items`,
+    headers.default
+  );
   expect(res.body).toStrictEqual({
     ...testItem,
     ...apiObjectProps('contract-item'),
@@ -63,7 +59,7 @@ it('can create a contract-item from the contract-items endpoint', async () => {
   const res = await client.post(
     { ...testItem, projectId: project.id },
     `/contract-items`,
-    defaultHeaders
+    headers.default
   );
   expect(res.body).toStrictEqual({
     ...testItem,
@@ -73,26 +69,14 @@ it('can create a contract-item from the contract-items endpoint', async () => {
   expect(res.status).toBe(201);
 });
 
-it('cannot create contract-items for a project that the users organization does not own', async () => {
-  // Create other user's organization
-  let res = await client.post(
-    { name: 'other-org' },
-    '/organizations',
-    headers.otherUser('other-user')
-  );
-  const otherOrgId = res.body.id;
-
-  res = await client.post(
-    testProject,
-    `/organizations/${otherOrgId}/projects`,
-    headers.userWithOrg(otherOrgId, 'other-user')
-  );
+it('cannot create contract-items for a project that the user does not own', async () => {
+  let res = await client.post(testProject, `/projects`, headers.otherUser());
   expect(res.status).toBe(201);
 
   res = await client.post(
     { ...testItem, projectId: res.body.id },
     `/contract-items`,
-    defaultHeaders
+    headers.default
   );
   expect(res.status).toBe(404);
 });
@@ -104,7 +88,7 @@ it('cannot create contract-items for projects that do no exist', async () => {
       projectId: 'does-not-exist',
     },
     '/contract-items',
-    defaultHeaders
+    headers.default
   );
   expect(res.status).toBe(404);
 });
@@ -112,7 +96,7 @@ it('cannot create contract-items for projects that do no exist', async () => {
 it('cannot create a contract-item with missing properties', async () => {
   const project = await createProject();
 
-  let res = await client.post({}, '/contract-items', defaultHeaders);
+  let res = await client.post({}, '/contract-items', headers.default);
   expect(res.body.details).toContainEqual(validationError(validation.required('projectId')));
   expect(res.body.details).toContainEqual(validationError(validation.required('itemNumber')));
   expect(res.body.details).toContainEqual(validationError(validation.required('quantity')));
@@ -123,7 +107,7 @@ it('cannot create a contract-item with missing properties', async () => {
   res = await client.post(
     { ...testItem, projectId: project.id },
     '/contract-items',
-    defaultHeaders
+    headers.default
   );
   expect(res.status).toBe(201);
 });
@@ -133,7 +117,7 @@ it('cannot create a contract-item with extra properties', async () => {
   const res = await client.post(
     { ...testProject, projectId: project.id, test: 'should-not-be-here' },
     '/contract-items',
-    defaultHeaders
+    headers.default
   );
   expect(res.body.details).toContainEqual(validationError(validation.extra('test')));
   expect(res.status).toBe(400);
@@ -144,13 +128,13 @@ it('cannot create two contract-items with the same itemNumber on the same projec
   let res = await client.post(
     { ...testItem, projectId: project.id },
     '/contract-items',
-    defaultHeaders
+    headers.default
   );
   expect(res.status).toBe(201);
   res = await client.post(
     { ...testItem, projectId: project.id },
     '/contract-items',
-    defaultHeaders
+    headers.default
   );
   expect(res.status).toBe(400);
 });
@@ -162,14 +146,14 @@ it('is able to create two contract-items with the same number under different pr
   let res = await client.post(
     { ...testItem, projectId: project1.id },
     '/contract-items',
-    defaultHeaders
+    headers.default
   );
   expect(res.status).toBe(201);
 
   res = await client.post(
     { ...testItem, projectId: project2.id },
     '/contract-items',
-    defaultHeaders
+    headers.default
   );
   expect(res.status).toBe(201);
 });
@@ -185,7 +169,7 @@ it('cannot create a contract-item with invalid properties', async () => {
       projectId: 4567,
     },
     '/contract-items',
-    defaultHeaders
+    headers.default
   );
 
   expect(res.body.details).toContainEqual(validationError(validation.string('itemNumber')));

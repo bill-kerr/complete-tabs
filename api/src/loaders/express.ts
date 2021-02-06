@@ -5,8 +5,6 @@ import express from 'express';
 import 'express-async-errors';
 import { methodChecker, responseWrapper, verifyJson } from '../middleware';
 import { errorHandler, NotFoundError } from '../errors';
-import { authRouter } from '../domain/auth/auth.controller';
-import { organizationRouter } from '../domain/organization/organization.controller';
 import { projectRouter } from '../domain/project/project.controller';
 import { contractItemRouter } from '../domain/contract-item/contract-item.controller';
 import { estimateRouter } from '../domain/estimate/estimate.controller';
@@ -24,8 +22,6 @@ export function initExpressApp() {
   app.use(json());
 
   const v1 = express.Router();
-  v1.use('/auth', authRouter);
-  v1.use('/organizations', organizationRouter);
   v1.use('/projects', projectRouter);
   v1.use('/contract-items', contractItemRouter);
   v1.use('/tab-items', tabItemRouter);
