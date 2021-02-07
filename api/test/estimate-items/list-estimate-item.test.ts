@@ -16,18 +16,10 @@ import {
 
 let app: Application;
 let client: TestClient;
-let orgId: string;
-let defaultHeaders: ReturnType<typeof headers.userWithOrg>;
 
 beforeAll(async () => {
   app = await initialize();
   client = makeClient('/api/v1', headers.default, app);
-});
-
-beforeEach(async () => {
-  const res = await client.post({ name: 'test-org' }, '/organizations');
-  orgId = res.body.id;
-  defaultHeaders = headers.userWithOrg(orgId);
 });
 
 const testEstimateItem = {
@@ -35,7 +27,7 @@ const testEstimateItem = {
 };
 
 const createProject = async (project: Partial<Project> = testProject) => {
-  const res = await client.post(project, '/projects', defaultHeaders);
+  const res = await client.post(project, '/projects', headers.default);
   return res.body as Project;
 };
 
@@ -43,12 +35,12 @@ const createContractItem = async (
   projectId: string,
   item: Partial<ContractItem> = testContractItem
 ) => {
-  const res = await client.post({ ...item, projectId }, '/contract-items', defaultHeaders);
+  const res = await client.post({ ...item, projectId }, '/contract-items', headers.default);
   return res.body as ContractItem;
 };
 
 const createEstimate = async (projectId: string, estimate = testEstimate) => {
-  const res = await client.post({ ...estimate, projectId }, '/estimates', defaultHeaders);
+  const res = await client.post({ ...estimate, projectId }, '/estimates', headers.default);
   return res.body as Estimate;
 };
 
@@ -60,7 +52,7 @@ const createEstimateItem = async (
   const res = await client.post(
     { ...estimateItem, contractItemId, estimateId },
     `/estimate-items`,
-    defaultHeaders
+    headers.default
   );
   return res.body as EstimateItem;
 };
@@ -81,7 +73,7 @@ it('can list estimate-items via the estimate-items endpoint', async () => {
   await createEstimateItem(contractItem.id, estimate.id);
   await createEstimateItem(contractItem.id, estimate.id);
 
-  const res = await client.get('/estimate-items', defaultHeaders);
+  const res = await client.get('/estimate-items', headers.default);
   expect(res.body.data).toHaveLength(2);
   expect(res.status).toBe(200);
 });
@@ -91,7 +83,10 @@ it('can list estimate-items via the contract-items endpoint', async () => {
   await createEstimateItem(contractItem.id, estimate.id);
   await createEstimateItem(contractItem.id, estimate.id);
 
-  const res = await client.get(`/contract-items/${contractItem.id}/estimate-items`, defaultHeaders);
+  const res = await client.get(
+    `/contract-items/${contractItem.id}/estimate-items`,
+    headers.default
+  );
   expect(res.body.data).toHaveLength(2);
   expect(res.status).toBe(200);
 });
@@ -101,7 +96,7 @@ it('can list estimate-items via the estimates endpoint', async () => {
   await createEstimateItem(contractItem.id, estimate.id);
   await createEstimateItem(contractItem.id, estimate.id);
 
-  const res = await client.get(`/estimates/${estimate.id}/estimate-items`, defaultHeaders);
+  const res = await client.get(`/estimates/${estimate.id}/estimate-items`, headers.default);
   expect(res.body.data).toHaveLength(2);
   expect(res.status).toBe(200);
 });
@@ -120,12 +115,12 @@ it('only retrieves estimate-items for the given contract-item', async () => {
 
   let response = await client.get(
     `/contract-items/${contractItemId}/estimate-items`,
-    defaultHeaders
+    headers.default
   );
   expect(response.body.data).toHaveLength(1);
   expect(response.status).toBe(200);
 
-  response = await client.get('/estimate-items', defaultHeaders);
+  response = await client.get('/estimate-items', headers.default);
   expect(response.body.data).toHaveLength(2);
 });
 
@@ -142,23 +137,23 @@ it('only retrieves estimate-items for the given estimate', async () => {
   );
   await createEstimateItem(contractItemId, res.estimate.id);
 
-  let response = await client.get(`/estimates/${estimateId}/estimate-items`, defaultHeaders);
+  let response = await client.get(`/estimates/${estimateId}/estimate-items`, headers.default);
   expect(response.body.data).toHaveLength(1);
   expect(response.status).toBe(200);
 
-  response = await client.get('/estimate-items', defaultHeaders);
+  response = await client.get('/estimate-items', headers.default);
   expect(response.body.data).toHaveLength(2);
 });
 
 it('returns an empty list if no estimate-items exist', async () => {
-  const res = await client.get('/estimate-items', defaultHeaders);
+  const res = await client.get('/estimate-items', headers.default);
   expect(res.body.data).toHaveLength(0);
   expect(res.status).toBe(200);
 });
 
-it('does not list estimate-items from other organizations', async () => {
+it('does not list estimate-items from other users', async () => {
   await createOtherEstimateItem(client);
-  const res = await client.get('/estimate-items', defaultHeaders);
+  const res = await client.get('/estimate-items', headers.default);
   expect(res.body.data).toHaveLength(0);
   expect(res.status).toBe(200);
 });

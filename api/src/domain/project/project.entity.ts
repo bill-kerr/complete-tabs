@@ -1,15 +1,14 @@
 import { Exclude, Expose } from 'class-transformer';
 import { IsBoolean, IsOptional, IsString, Length, IsNotEmpty } from 'class-validator';
-import { Entity, Column, ManyToOne, Unique, OneToMany, RelationId } from 'typeorm';
+import { Entity, Column, Unique, OneToMany } from 'typeorm';
 import { ApiObject } from '../api-object';
 import { validation } from '../../validation';
 import { Groups } from '../groups';
-import { Organization } from '../organization/organization.entity';
 import { ContractItem } from '../contract-item/contract-item.entity';
 import { Estimate } from '../estimate/estimate.entity';
 
 @Entity()
-@Unique(['projectNumber', 'organization'])
+@Unique(['projectNumber', 'userId'])
 @Exclude()
 export class Project extends ApiObject {
   object = 'project';
@@ -64,11 +63,8 @@ export class Project extends ApiObject {
   active: boolean;
 
   @Expose({ groups: [Groups.READ] })
-  @RelationId('organization')
-  organizationId: string;
-
-  @ManyToOne(() => Organization, org => org.projects, { onDelete: 'CASCADE' })
-  organization: Organization;
+  @Column({ nullable: false })
+  userId: string;
 
   @OneToMany(() => ContractItem, contractItem => contractItem.project)
   contractItems: ContractItem[];

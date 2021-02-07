@@ -5,7 +5,6 @@ import { Project } from '../../src/domain/project/project.entity';
 import { validation } from '../../src/validation';
 import {
   apiObjectProps,
-  createOrganization,
   headers,
   initialize,
   makeClient,
@@ -18,18 +17,10 @@ import {
 
 let app: Application;
 let client: TestClient;
-let orgId: string;
-let defaultHeaders: ReturnType<typeof headers.userWithOrg>;
 
 beforeAll(async () => {
   app = await initialize();
   client = makeClient('/api/v1', headers.default, app);
-});
-
-beforeEach(async () => {
-  const res = await client.post({ name: 'test-org' }, '/organizations');
-  orgId = res.body.id;
-  defaultHeaders = headers.userWithOrg(orgId);
 });
 
 const testEstimateItem = {
@@ -37,7 +28,7 @@ const testEstimateItem = {
 };
 
 const createProject = async (project: Partial<Project> = testProject) => {
-  const res = await client.post(project, '/projects', defaultHeaders);
+  const res = await client.post(project, '/projects', headers.default);
   return res.body as Project;
 };
 
@@ -45,12 +36,12 @@ const createContractItem = async (
   projectId: string,
   item: Partial<ContractItem> = testContractItem
 ) => {
-  const res = await client.post({ ...item, projectId }, '/contract-items', defaultHeaders);
+  const res = await client.post({ ...item, projectId }, '/contract-items', headers.default);
   return res.body as ContractItem;
 };
 
 const createEstimate = async (projectId: string, estimate = testEstimate) => {
-  const res = await client.post({ ...estimate, projectId }, '/estimates', defaultHeaders);
+  const res = await client.post({ ...estimate, projectId }, '/estimates', headers.default);
   return res.body as Estimate;
 };
 
@@ -66,7 +57,7 @@ it('can create an estimate-item via the contract-items endpoint', async () => {
   const res = await client.post(
     { ...testEstimateItem, estimateId: estimate.id },
     `/contract-items/${contractItem.id}/estimate-items`,
-    defaultHeaders
+    headers.default
   );
   expect(res.body).toStrictEqual({
     ...apiObjectProps('estimate-item'),
@@ -82,7 +73,7 @@ it('can create an estimate-item via the estimates endpoint', async () => {
   const res = await client.post(
     { ...testEstimateItem, contractItemId: contractItem.id },
     `/estimates/${estimate.id}/estimate-items`,
-    defaultHeaders
+    headers.default
   );
   expect(res.body).toStrictEqual({
     ...apiObjectProps('estimate-item'),
@@ -98,7 +89,7 @@ it('can create an estimate-item via the estimate-items endpoint', async () => {
   const res = await client.post(
     { ...testEstimateItem, contractItemId: contractItem.id, estimateId: estimate.id },
     '/estimate-items',
-    defaultHeaders
+    headers.default
   );
   expect(res.body).toStrictEqual({
     ...apiObjectProps('estimate-item'),
@@ -109,29 +100,31 @@ it('can create an estimate-item via the estimate-items endpoint', async () => {
   expect(res.status).toBe(201);
 });
 
-it('cannot create estimate-items for a contract-item that the users organization does not own', async () => {
-  const otherOrg = await createOrganization(client);
-  const otherHeaders = headers.userWithOrg(otherOrg.id, 'other-user');
-  let res = await client.post(testProject, `/organizations/${otherOrg.id}/projects`, otherHeaders);
+it('cannot create estimate-items for a contract-item that the user does not own', async () => {
+  let res = await client.post(testProject, `/projects`, headers.otherUser());
   expect(res.status).toBe(201);
   const otherProject = res.body;
 
   res = await client.post(
     testContractItem,
     `/projects/${otherProject.id}/contract-items`,
-    otherHeaders
+    headers.otherUser()
   );
   expect(res.status).toBe(201);
   const contractItemId = res.body.id;
 
-  res = await client.post(testEstimate, `/projects/${otherProject.id}/estimates`, otherHeaders);
+  res = await client.post(
+    testEstimate,
+    `/projects/${otherProject.id}/estimates`,
+    headers.otherUser()
+  );
   expect(res.status).toBe(201);
   const estimateId = res.body.id;
 
   res = await client.post(
     { ...testEstimateItem, contractItemId, estimateId },
     '/estimate-items',
-    defaultHeaders
+    headers.default
   );
   expect(res.status).toBe(404);
 });
@@ -142,7 +135,7 @@ it('cannot create estimate-items for contract-items that do not exist', async ()
   let res = await client.post(
     { ...testEstimateItem, contractItemId: 'does-not-exist', estimateId: estimate.id },
     `/estimate-items`,
-    defaultHeaders
+    headers.default
   );
   expect(res.status).toBe(404);
 });
@@ -153,13 +146,13 @@ it('cannot create estimate-items for estimates that do not exist', async () => {
   let res = await client.post(
     { ...testEstimateItem, contractItemId: contractItem.id, estimateId: 'does-not-exist' },
     `/estimate-items`,
-    defaultHeaders
+    headers.default
   );
   expect(res.status).toBe(404);
 });
 
 it('cannot create an estimate-item with missing properties', async () => {
-  const res = await client.post({}, '/estimate-items', defaultHeaders);
+  const res = await client.post({}, '/estimate-items', headers.default);
   expect(res.body.details).toContainEqual(validationError(validation.required('contractItemId')));
   expect(res.body.details).toContainEqual(validationError(validation.required('estimateId')));
   expect(res.body.details).toContainEqual(validationError(validation.required('quantity')));
@@ -185,7 +178,7 @@ it('cannot create an estimate-item with invalid properties', async () => {
   const res = await client.post(
     { quantity: '12', contractItemId: 12, estimateId: 12 },
     '/estimate-items',
-    defaultHeaders
+    headers.default
   );
   expect(res.body.details).toContainEqual(validationError(validation.number('quantity')));
   expect(res.body.details).toContainEqual(validationError(validation.string('contractItemId')));

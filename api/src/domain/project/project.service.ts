@@ -1,13 +1,11 @@
 import { NotFoundError } from '../../errors';
 import { calcPagination } from '../../utils';
 import { ReadContext, ReadManyContext, WriteContext } from '../context';
-import { Organization } from '../organization/organization.entity';
-import { getOrganizationById } from '../organization/organization.service';
 import { Project } from './project.entity';
 
 export async function getProjectById(id: string, context: ReadContext<Project>) {
   const project = await Project.findOne({
-    where: { ...context.filter, id, organization: { id: context.user.organizationId } },
+    where: { ...context.filter, id, userId: context.user.id },
   });
   if (!project) {
     throw new NotFoundError(`A project with an id of ${id} does not exist.`);
@@ -17,24 +15,15 @@ export async function getProjectById(id: string, context: ReadContext<Project>) 
 
 export async function getProjects(context: ReadManyContext<Project>) {
   const projects = await Project.find({
-    where: { ...context.filter, organization: { id: context.user.organizationId } },
+    where: { ...context.filter, userId: context.user.id },
     ...calcPagination(context),
   });
   return projects;
 }
 
-export async function createProjectByOrganization(
-  context: WriteContext<Project>,
-  organization: Organization
-) {
-  const project = Project.create({ ...context.resource, organization });
-  await project.persist();
-  return project;
-}
-
 export async function createProject(context: WriteContext<Project>) {
-  const org = await getOrganizationById(context.user.organizationId, { user: context.user });
-  const project = await createProjectByOrganization(context, org);
+  const project = Project.create({ ...context.resource, userId: context.user.id });
+  await project.persist();
   return project;
 }
 

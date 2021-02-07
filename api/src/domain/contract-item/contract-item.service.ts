@@ -52,8 +52,8 @@ function getQuery(context: ReadContext<ContractItem>, id?: string) {
     .innerJoin(
       Project,
       'project',
-      'project.id = contract_item.project_id AND project.organization_id = :id',
-      { id: context.user.organizationId }
+      'project.id = contract_item.project_id AND project.user_id = :id',
+      { id: context.user.id }
     )
     .where(filter);
 }

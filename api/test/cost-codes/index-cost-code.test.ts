@@ -15,22 +15,14 @@ import {
 
 let app: Application;
 let client: TestClient;
-let orgId: string;
-let defaultHeaders: ReturnType<typeof headers.userWithOrg>;
 
 beforeAll(async () => {
   app = await initialize();
   client = makeClient('/api/v1', headers.default, app);
 });
 
-beforeEach(async () => {
-  const res = await client.post({ name: 'test-org' }, '/organizations');
-  orgId = res.body.id;
-  defaultHeaders = headers.userWithOrg(orgId);
-});
-
 const createProject = async (project: Partial<Project> = testProject) => {
-  const res = await client.post(project, '/projects', defaultHeaders);
+  const res = await client.post(project, '/projects', headers.default);
   return res.body as Project;
 };
 
@@ -38,7 +30,7 @@ const createContractItem = async (
   projectId: string,
   item: Partial<ContractItem> = testContractItem
 ) => {
-  const res = await client.post({ ...item, projectId }, '/contract-items', defaultHeaders);
+  const res = await client.post({ ...item, projectId }, '/contract-items', headers.default);
   return res.body as ContractItem;
 };
 
@@ -46,7 +38,7 @@ const createCostCode = async (
   contractItemId: string,
   costCode: Partial<CostCode> = testCostCode
 ) => {
-  const res = await client.post({ ...costCode, contractItemId }, '/cost-codes', defaultHeaders);
+  const res = await client.post({ ...costCode, contractItemId }, '/cost-codes', headers.default);
   return res.body as CostCode;
 };
 
@@ -60,13 +52,13 @@ it('can get a cost-code', async () => {
   const { contractItem } = await createProjectAndContractItem();
   const costCode = await createCostCode(contractItem.id);
 
-  const res = await client.get(`/cost-codes/${costCode.id}`, defaultHeaders);
+  const res = await client.get(`/cost-codes/${costCode.id}`, headers.default);
   expect(res.body).toStrictEqual(costCode);
   expect(res.status).toBe(200);
 });
 
 it('returns a 404 when the cost-code does not exist', async () => {
-  const res = await client.get('/cost-codes/does-not-exist', defaultHeaders);
+  const res = await client.get('/cost-codes/does-not-exist', headers.default);
   expect(res.body).toStrictEqual({
     object: 'error',
     name: 'Not Found Error',
@@ -78,6 +70,6 @@ it('returns a 404 when the cost-code does not exist', async () => {
 
 it('can only get cost-codes belonging to the users organizaiton', async () => {
   const otherCostCode = await createOtherCostCode(client);
-  const res = await client.get(`/cost-codes/${otherCostCode.id}`, defaultHeaders);
+  const res = await client.get(`/cost-codes/${otherCostCode.id}`, headers.default);
   expect(res.status).toBe(404);
 });

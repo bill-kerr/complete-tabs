@@ -15,22 +15,14 @@ import {
 
 let app: Application;
 let client: TestClient;
-let orgId: string;
-let defaultHeaders: ReturnType<typeof headers.userWithOrg>;
 
 beforeAll(async () => {
   app = await initialize();
   client = makeClient('/api/v1', headers.default, app);
 });
 
-beforeEach(async () => {
-  const res = await client.post({ name: 'test-org' }, '/organizations');
-  orgId = res.body.id;
-  defaultHeaders = headers.userWithOrg(orgId);
-});
-
 const createProject = async (project: Partial<Project> = testProject) => {
-  const res = await client.post(project, '/projects', defaultHeaders);
+  const res = await client.post(project, '/projects', headers.default);
   return res.body as Project;
 };
 
@@ -38,12 +30,12 @@ const createContractItem = async (
   projectId: string,
   item: Partial<ContractItem> = testContractItem
 ) => {
-  const res = await client.post({ ...item, projectId }, '/contract-items', defaultHeaders);
+  const res = await client.post({ ...item, projectId }, '/contract-items', headers.default);
   return res.body as ContractItem;
 };
 
 const createTabItem = async (contractItemId: string, item: Partial<TabItem> = testTabItem) => {
-  const res = await client.post({ ...item, contractItemId }, '/tab-items', defaultHeaders);
+  const res = await client.post({ ...item, contractItemId }, '/tab-items', headers.default);
   return res.body as TabItem;
 };
 
@@ -57,13 +49,13 @@ it('can get a tab-item', async () => {
   const { contractItem } = await createProjectAndContractItem();
   const tabItem = await createTabItem(contractItem.id);
 
-  const res = await client.get(`/tab-items/${tabItem.id}`, defaultHeaders);
+  const res = await client.get(`/tab-items/${tabItem.id}`, headers.default);
   expect(res.body).toStrictEqual(tabItem);
   expect(res.status).toBe(200);
 });
 
 it('returns a 404 when the tab-item does not exist', async () => {
-  const res = await client.get('/tab-items/does-not-exist', defaultHeaders);
+  const res = await client.get('/tab-items/does-not-exist', headers.default);
   expect(res.body).toStrictEqual({
     object: 'error',
     name: 'Not Found Error',
@@ -73,8 +65,8 @@ it('returns a 404 when the tab-item does not exist', async () => {
   expect(res.status).toBe(404);
 });
 
-it('can only get tab-items belonging to the users organization', async () => {
+it('can only get tab-items belonging to the user', async () => {
   const otherTabItem = await createOtherTabItem(client);
-  const res = await client.get(`/tab-items/${otherTabItem.id}`, defaultHeaders);
+  const res = await client.get(`/tab-items/${otherTabItem.id}`, headers.default);
   expect(res.status).toBe(404);
 });
