@@ -15,22 +15,14 @@ import {
 
 let app: Application;
 let client: TestClient;
-let orgId: string;
-let defaultHeaders: ReturnType<typeof headers.userWithOrg>;
 
 beforeAll(async () => {
   app = await initialize();
   client = makeClient('/api/v1', headers.default, app);
 });
 
-beforeEach(async () => {
-  const res = await client.post({ name: 'test-org' }, '/organizations');
-  orgId = res.body.id;
-  defaultHeaders = headers.userWithOrg(orgId);
-});
-
 const createProject = async (project: Partial<Project> = testProject) => {
-  const res = await client.post(project, '/projects', defaultHeaders);
+  const res = await client.post(project, '/projects', headers.default);
   return res.body as Project;
 };
 
@@ -38,12 +30,12 @@ const createContractItem = async (
   projectId: string,
   item: Partial<ContractItem> = testContractItem
 ) => {
-  const res = await client.post({ ...item, projectId }, '/contract-items', defaultHeaders);
+  const res = await client.post({ ...item, projectId }, '/contract-items', headers.default);
   return res.body as ContractItem;
 };
 
 const createTabItem = async (contractItemId: string, item: Partial<TabItem> = testTabItem) => {
-  const res = await client.post({ ...item, contractItemId }, '/tab-items', defaultHeaders);
+  const res = await client.post({ ...item, contractItemId }, '/tab-items', headers.default);
   return res.body as TabItem;
 };
 
@@ -58,7 +50,7 @@ it('can list tab-items via the tab-items endpoint', async () => {
   await createTabItem(contractItem.id);
   await createTabItem(contractItem.id);
 
-  const res = await client.get('/tab-items', defaultHeaders);
+  const res = await client.get('/tab-items', headers.default);
   expect(res.body.data).toHaveLength(2);
   expect(res.status).toBe(200);
 });
@@ -67,7 +59,7 @@ it('can list tab-items via the contract-items endpoint', async () => {
   const { contractItem } = await createProjectAndContractItem();
   await createTabItem(contractItem.id);
 
-  const res = await client.get(`/contract-items/${contractItem.id}/tab-items`, defaultHeaders);
+  const res = await client.get(`/contract-items/${contractItem.id}/tab-items`, headers.default);
   expect(res.body.data).toHaveLength(1);
   expect(res.status).toBe(200);
 });
@@ -79,7 +71,7 @@ it('only retrieves tab-items for the given contract-item', async () => {
   let res = await client.post(
     { ...testContractItem, itemNumber: 'other-number', projectId: project.id },
     '/contract-items',
-    defaultHeaders
+    headers.default
   );
   expect(res.status).toBe(201);
   const otherContractItem = res.body;
@@ -87,26 +79,26 @@ it('only retrieves tab-items for the given contract-item', async () => {
   res = await client.post(
     { ...testTabItem, contractItemId: otherContractItem.id },
     `/tab-items`,
-    defaultHeaders
+    headers.default
   );
   expect(res.status).toBe(201);
 
-  res = await client.get(`/contract-items/${otherContractItem.id}/tab-items`, defaultHeaders);
+  res = await client.get(`/contract-items/${otherContractItem.id}/tab-items`, headers.default);
   expect(res.body.data).toHaveLength(1);
 
-  res = await client.get(`/tab-items`, defaultHeaders);
+  res = await client.get(`/tab-items`, headers.default);
   expect(res.body.data).toHaveLength(2);
 });
 
 it('returns an empty list if no tab-items exist', async () => {
-  const res = await client.get('/tab-items', defaultHeaders);
+  const res = await client.get('/tab-items', headers.default);
   expect(res.body.data).toHaveLength(0);
   expect(res.status).toBe(200);
 });
 
-it('does not list tab-items from other organizations', async () => {
+it('does not list tab-items from other users', async () => {
   await createOtherTabItem(client);
-  const res = await client.get('/tab-items', defaultHeaders);
+  const res = await client.get('/tab-items', headers.default);
   expect(res.body.data).toHaveLength(0);
   expect(res.status).toBe(200);
 });

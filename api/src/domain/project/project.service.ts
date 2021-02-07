@@ -7,7 +7,6 @@ export async function getProjectById(id: string, context: ReadContext<Project>) 
   const project = await Project.findOne({
     where: { ...context.filter, id, userId: context.user.id },
   });
-  console.log(project?.userId, context.user.id);
   if (!project) {
     throw new NotFoundError(`A project with an id of ${id} does not exist.`);
   }
@@ -23,7 +22,6 @@ export async function getProjects(context: ReadManyContext<Project>) {
 }
 
 export async function createProject(context: WriteContext<Project>) {
-  console.log(context.user.id);
   const project = Project.create({ ...context.resource, userId: context.user.id });
   await project.persist();
   return project;

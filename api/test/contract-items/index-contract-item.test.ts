@@ -5,18 +5,10 @@ import { headers, initialize, makeClient, TestClient } from '../helpers';
 
 let app: Application;
 let client: TestClient;
-let orgId: string;
-let defaultHeaders: ReturnType<typeof headers.userWithOrg>;
 
 beforeAll(async () => {
   app = await initialize();
   client = makeClient('/api/v1', headers.default, app);
-});
-
-beforeEach(async () => {
-  const res = await client.post({ name: 'test-org' }, '/organizations');
-  orgId = res.body.id;
-  defaultHeaders = headers.userWithOrg(orgId);
 });
 
 const testProject = {
@@ -36,25 +28,25 @@ const testItem = {
 };
 
 const createProject = async (project: Partial<Project> = testProject) => {
-  const res = await client.post(project, '/projects', defaultHeaders);
+  const res = await client.post(project, '/projects', headers.default);
   return res.body as Project;
 };
 
 const createItem = async (projectId: string, item: Partial<ContractItem> = testItem) => {
-  const res = await client.post({ ...item, projectId }, '/contract-items', defaultHeaders);
+  const res = await client.post({ ...item, projectId }, '/contract-items', headers.default);
   return res.body as ContractItem;
 };
 
 it('can get a contract-item', async () => {
   const project = await createProject();
   const item = await createItem(project.id);
-  const res = await client.get(`/contract-items/${item.id}`, defaultHeaders);
+  const res = await client.get(`/contract-items/${item.id}`, headers.default);
   expect(res.body).toStrictEqual(item);
   expect(res.status).toBe(200);
 });
 
 it('returns a 404 when the contract-item does not exist', async () => {
-  const res = await client.get('/contract-items/does-not-exist', defaultHeaders);
+  const res = await client.get('/contract-items/does-not-exist', headers.default);
   expect(res.body).toStrictEqual({
     object: 'error',
     name: 'Not Found Error',
@@ -64,29 +56,17 @@ it('returns a 404 when the contract-item does not exist', async () => {
   expect(res.status).toBe(404);
 });
 
-it('can only get contract-items that belong to the users organization', async () => {
-  // Create other user's organization
-  let res = await client.post(
-    { name: 'other-org' },
-    '/organizations',
-    headers.otherUser('other-user')
-  );
-  const otherOrgId = res.body.id;
-
-  res = await client.post(
-    testProject,
-    `/organizations/${otherOrgId}/projects`,
-    headers.userWithOrg(otherOrgId, 'other-user')
-  );
+it('can only get contract-items that belong to the user', async () => {
+  let res = await client.post(testProject, `/projects`, headers.otherUser());
   expect(res.status).toBe(201);
 
   res = await client.post(
     { ...testItem, projectId: res.body.id },
     '/contract-items',
-    headers.userWithOrg(otherOrgId, 'other-user')
+    headers.otherUser()
   );
   expect(res.status).toBe(201);
 
-  res = await client.get(`/contract-items/${res.body.id}`, defaultHeaders);
+  res = await client.get(`/contract-items/${res.body.id}`, headers.default);
   expect(res.status).toBe(404);
 });

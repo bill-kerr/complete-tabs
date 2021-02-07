@@ -16,18 +16,10 @@ import {
 
 let app: Application;
 let client: TestClient;
-let orgId: string;
-let defaultHeaders: ReturnType<typeof headers.userWithOrg>;
 
 beforeAll(async () => {
   app = await initialize();
   client = makeClient('/api/v1', headers.default, app);
-});
-
-beforeEach(async () => {
-  const res = await client.post({ name: 'test-org' }, '/organizations');
-  orgId = res.body.id;
-  defaultHeaders = headers.userWithOrg(orgId);
 });
 
 const testEstimateItem = {
@@ -35,7 +27,7 @@ const testEstimateItem = {
 };
 
 const createProject = async (project: Partial<Project> = testProject) => {
-  const res = await client.post(project, '/projects', defaultHeaders);
+  const res = await client.post(project, '/projects', headers.default);
   return res.body as Project;
 };
 
@@ -43,12 +35,12 @@ const createContractItem = async (
   projectId: string,
   item: Partial<ContractItem> = testContractItem
 ) => {
-  const res = await client.post({ ...item, projectId }, '/contract-items', defaultHeaders);
+  const res = await client.post({ ...item, projectId }, '/contract-items', headers.default);
   return res.body as ContractItem;
 };
 
 const createEstimate = async (projectId: string, estimate = testEstimate) => {
-  const res = await client.post({ ...estimate, projectId }, '/estimates', defaultHeaders);
+  const res = await client.post({ ...estimate, projectId }, '/estimates', headers.default);
   return res.body as Estimate;
 };
 
@@ -60,7 +52,7 @@ const createEstimateItem = async (
   const res = await client.post(
     { ...estimateItem, contractItemId, estimateId },
     `/estimate-items`,
-    defaultHeaders
+    headers.default
   );
   return res.body as EstimateItem;
 };
@@ -80,16 +72,16 @@ it('can delete an estimate-item', async () => {
   const { estimate, contractItem } = await createProjectContractItemAndEstimate();
   const estimateItem = await createEstimateItem(contractItem.id, estimate.id);
 
-  let res = await client.delete(`/estimate-items/${estimateItem.id}`, defaultHeaders);
+  let res = await client.delete(`/estimate-items/${estimateItem.id}`, headers.default);
   expect(res.status).toBe(204);
 
-  res = await client.get(`/estimate-items/${estimateItem.id}`, defaultHeaders);
+  res = await client.get(`/estimate-items/${estimateItem.id}`, headers.default);
   expect(res.status).toBe(404);
 });
 
-it('cannot delete an estimate-item from another organization', async () => {
+it('cannot delete an estimate-item from another user', async () => {
   const otherEstimateItem = await createOtherEstimateItem(client);
 
-  const res = await client.delete(`/estimate-items/${otherEstimateItem.id}`, defaultHeaders);
+  const res = await client.delete(`/estimate-items/${otherEstimateItem.id}`, headers.default);
   expect(res.status).toBe(404);
 });

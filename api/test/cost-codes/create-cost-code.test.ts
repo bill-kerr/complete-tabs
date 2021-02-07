@@ -5,7 +5,6 @@ import { Project } from '../../src/domain/project/project.entity';
 import { validation } from '../../src/validation';
 import {
   apiObjectProps,
-  createOrganization,
   headers,
   initialize,
   makeClient,
@@ -18,22 +17,14 @@ import {
 
 let app: Application;
 let client: TestClient;
-let orgId: string;
-let defaultHeaders: ReturnType<typeof headers.userWithOrg>;
 
 beforeAll(async () => {
   app = await initialize();
   client = makeClient('/api/v1', headers.default, app);
 });
 
-beforeEach(async () => {
-  const res = await client.post({ name: 'test-org' }, '/organizations');
-  orgId = res.body.id;
-  defaultHeaders = headers.userWithOrg(orgId);
-});
-
 const createProject = async (project: Partial<Project> = testProject) => {
-  const res = await client.post(project, '/projects', defaultHeaders);
+  const res = await client.post(project, '/projects', headers.default);
   return res.body as Project;
 };
 
@@ -41,7 +32,7 @@ const createContractItem = async (
   projectId: string,
   item: Partial<ContractItem> = testContractItem
 ) => {
-  const res = await client.post({ ...item, projectId }, '/contract-items', defaultHeaders);
+  const res = await client.post({ ...item, projectId }, '/contract-items', headers.default);
   return res.body as ContractItem;
 };
 
@@ -49,7 +40,7 @@ const createCostCode = async (
   contractItemId: string,
   costCode: Partial<CostCode> = testCostCode
 ) => {
-  const res = await client.post({ ...costCode, contractItemId }, '/cost-codes', defaultHeaders);
+  const res = await client.post({ ...costCode, contractItemId }, '/cost-codes', headers.default);
   return res.body as CostCode;
 };
 
@@ -64,7 +55,7 @@ it('can create a cost-code via the contract-items endpoint', async () => {
   const res = await client.post(
     testCostCode,
     `/contract-items/${contractItem.id}/cost-codes`,
-    defaultHeaders
+    headers.default
   );
   expect(res.body).toStrictEqual({
     ...apiObjectProps('cost-code'),
@@ -79,7 +70,7 @@ it('can create a cost-code via the cost-codes endpoint', async () => {
   const res = await client.post(
     { ...testCostCode, contractItemId: contractItem.id },
     `/cost-codes`,
-    defaultHeaders
+    headers.default
   );
   expect(res.body).toStrictEqual({
     ...apiObjectProps('cost-code'),
@@ -89,31 +80,29 @@ it('can create a cost-code via the cost-codes endpoint', async () => {
   expect(res.status).toBe(201);
 });
 
-it('cannot create cost-codes for a contract-item that the users organization does not own', async () => {
-  const otherOrg = await createOrganization(client);
-  const otherHeaders = headers.userWithOrg(otherOrg.id, 'other-user');
-  let res = await client.post(testProject, `/organizations/${otherOrg.id}/projects`, otherHeaders);
+it('cannot create cost-codes for a contract-item that the user does not own', async () => {
+  let res = await client.post(testProject, `/projects`, headers.otherUser());
   expect(res.status).toBe(201);
   const otherProject = res.body;
 
   res = await client.post(
     testContractItem,
     `/projects/${otherProject.id}/contract-items`,
-    otherHeaders
+    headers.otherUser()
   );
   expect(res.status).toBe(201);
 
   res = await client.post(
     { ...testCostCode, contractItemId: res.body.id },
     '/cost-codes',
-    otherHeaders
+    headers.otherUser()
   );
   expect(res.status).toBe(201);
 
   res = await client.post(
     { ...testCostCode, contractItemId: res.body.id },
     '/cost-codes',
-    defaultHeaders
+    headers.default
   );
   expect(res.status).toBe(404);
 });
@@ -122,13 +111,13 @@ it('cannot create a cost-code for contract-items that do not exist', async () =>
   const res = await client.post(
     { ...testCostCode, contractItemId: 'does-not-exist' },
     '/cost-codes',
-    defaultHeaders
+    headers.default
   );
   expect(res.status).toBe(404);
 });
 
 it('cannot create a cost-code with missing properties', async () => {
-  let res = await client.post({}, '/cost-codes', defaultHeaders);
+  let res = await client.post({}, '/cost-codes', headers.default);
   expect(res.body.details).toContainEqual(validationError(validation.required('description')));
   expect(res.body.details).toContainEqual(validationError(validation.required('quantity')));
   expect(res.body.details).toContainEqual(validationError(validation.required('contractItemId')));
@@ -149,7 +138,7 @@ it('cannot create a cost-code with invalid properties', async () => {
       contractItemId: 45,
     },
     '/cost-codes',
-    defaultHeaders
+    headers.default
   );
   expect(res.body.details).toContainEqual(validationError(validation.string('code')));
   expect(res.body.details).toContainEqual(validationError(validation.string('description')));
@@ -168,7 +157,7 @@ it('cannot create a cost-code with extra properties', async () => {
   const res = await client.post(
     { ...testCostCode, contractItemId: contractItem.id, test: 'should-not-be-here' },
     '/cost-codes',
-    defaultHeaders
+    headers.default
   );
   expect(res.body.details).toContainEqual(validationError(validation.extra('test')));
   expect(res.status).toBe(400);
@@ -180,14 +169,14 @@ it('cannot create two cost-codes with the same code under the same project', asy
   let res = await client.post(
     { ...testCostCode, contractItemId: contractItem.id },
     '/cost-codes',
-    defaultHeaders
+    headers.default
   );
   expect(res.status).toBe(201);
 
   res = await client.post(
     { ...testCostCode, contractItemId: contractItem.id },
     '/cost-codes',
-    defaultHeaders
+    headers.default
   );
   expect(res.status).toBe(400);
 });
@@ -199,21 +188,21 @@ it('is able to create two cost-codes with the same code under different projects
   let res = await client.post(
     { ...testProject, projectNumber: 'other-proj' },
     '/projects',
-    defaultHeaders
+    headers.default
   );
   expect(res.status).toBe(201);
 
   res = await client.post(
     { ...testContractItem, itemNumber: 'different-item-number', projectId: res.body.id },
     '/contract-items',
-    defaultHeaders
+    headers.default
   );
   expect(res.status).toBe(201);
 
   res = await client.post(
     { ...testCostCode, contractItemId: res.body.id },
     '/cost-codes',
-    defaultHeaders
+    headers.default
   );
   expect(res.status).toBe(201);
 });

@@ -81,7 +81,6 @@ it('can create a project with same projectNumber if they belong to different use
   expect(res.status).toBe(400);
 
   res = await client.post(testProject, `/projects`, headers.otherUser());
-  console.log(res.body);
   expect(res.status).toBe(201);
 });
 
