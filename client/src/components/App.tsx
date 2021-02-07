@@ -1,22 +1,21 @@
 import { BrowserRouter } from 'react-router-dom';
+import { Provider } from 'react-redux';
 import '../assets/css/fonts.css';
 import '../assets/css/main.css';
-import { useAuthState } from '../hooks/useAuthState';
 import { useWaitForSignIn } from '../hooks/useWaitForSignIn';
 import { AllRoutes } from './routing/AllRoutes';
-import { AuthContext } from '../context';
+import store from '../state/store';
 
 export const App: React.FC = () => {
   const waiting = useWaitForSignIn();
-  const user = useAuthState();
 
   return waiting ? (
     <div>loading...</div>
   ) : (
     <BrowserRouter>
-      <AuthContext.Provider value={user}>
+      <Provider store={store}>
         <AllRoutes />
-      </AuthContext.Provider>
+      </Provider>
     </BrowserRouter>
   );
 };

@@ -23,7 +23,7 @@ const createProject = async (project: Partial<Project> = testProject) => {
   return res.body as Project;
 };
 
-it('can list projects that belong to the users current organization', async () => {
+it('can list projects that belong to the user', async () => {
   await createProject(testProject);
   await createProject({ ...testProject, projectNumber: 'other-project-number' });
   let res = await client.get(`/projects`, headers.default);

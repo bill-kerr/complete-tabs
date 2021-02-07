@@ -18,19 +18,6 @@ const testProject = {
   active: true,
 };
 
-it('can create a project from the organizations endpoint', async () => {
-  const res = await client.post(testProject, `/projects`, headers.default);
-  expect(res.body).toStrictEqual({
-    ...testProject,
-    id: expect.any(String),
-    object: 'project',
-    userId: expect.any(String),
-    createdAt: expect.any(Number),
-    updatedAt: expect.any(Number),
-  });
-  expect(res.status).toBe(201);
-});
-
 it('can create a project from the projects endpoint', async () => {
   const res = await client.post(testProject, '/projects', headers.default);
   expect(res.body).toStrictEqual({
