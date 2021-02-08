@@ -90,14 +90,7 @@ it('cannot update projectNumber to an already existing one', async () => {
 it('cannot update unintended fields of a project', async () => {
   const project = await createProject();
 
-  let res = await client.put(
-    { organizationId: 'new-id' },
-    `/projects/${project.id}`,
-    headers.default
-  );
-  expect(res.status).toBe(400);
-
-  res = await client.put({ organization: 'new-id' }, `/projects/${project.id}`, headers.default);
+  let res = await client.put({ userId: 'new-id' }, `/projects/${project.id}`, headers.default);
   expect(res.status).toBe(400);
 
   res = await client.put({ object: 'object' }, `/projects/${project.id}`, headers.default);
@@ -112,7 +105,7 @@ it('cannot update unintended fields of a project', async () => {
   res = await client.put({ updatedAt: 1111 }, `/projects/${project.id}`, headers.default);
   expect(res.status).toBe(400);
 
-  res = await client.put({ organization: 1111 }, `/projects/${project.id}`, headers.default);
+  res = await client.put({ userId: 1111 }, `/projects/${project.id}`, headers.default);
   expect(res.status).toBe(400);
 
   res = await client.get(`/projects/${project.id}`, headers.default);

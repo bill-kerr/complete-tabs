@@ -133,7 +133,7 @@ it('returns an empty list if no cost-codes exist', async () => {
   expect(res.status).toBe(200);
 });
 
-it('does not list cost-codes from other organizations', async () => {
+it('does not list cost-codes from other users', async () => {
   await createOtherCostCode(client);
   const { project, contractItem } = await createProjectAndContractItem();
 

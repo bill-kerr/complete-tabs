@@ -68,7 +68,7 @@ it('returns a 404 when the cost-code does not exist', async () => {
   expect(res.status).toBe(404);
 });
 
-it('can only get cost-codes belonging to the users organizaiton', async () => {
+it('can only get cost-codes belonging to the user', async () => {
   const otherCostCode = await createOtherCostCode(client);
   const res = await client.get(`/cost-codes/${otherCostCode.id}`, headers.default);
   expect(res.status).toBe(404);

@@ -136,12 +136,6 @@ export const getFirebaseError = (error: any): FirebaseError => {
   }
 };
 
-export const getOrganizationClaim = async () => {
-  const currentUser = firebase.auth().currentUser;
-  const result = await currentUser?.getIdTokenResult();
-  return result ? (result.claims.organizationId as string) : undefined;
-};
-
 const signInWithPopup = (provider: firebase.auth.AuthProvider) => {
   return firebase.auth().signInWithPopup(provider);
 };
